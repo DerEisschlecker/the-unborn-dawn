@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="CatalogData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/catalog_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+entries = {
+"leather_belt": {"name": "Werkzeugguertel", "category": "Guertel", "equip_slot": "belt", "weight": 0.5, "carry_weight_bonus": 2.0, "stamina_bonus": 1, "description": "Ein breiter Guertel mit Oesen fuer Werkzeug und kleine Beutel.", "icon": "res://assets/items/accessories/belt.svg", "loot_enabled": true, "min_danger": 0, "spawn_weight": 42},
+"reinforced_belt": {"name": "Verstaerkter Trageguertel", "category": "Guertel", "equip_slot": "belt", "rarity": "selten", "rarity_rank": 2, "weight": 0.7, "carry_weight_bonus": 4.0, "vitality": 1, "description": "Doppelte Lederlagen und Metallverstrebungen verteilen die Last besser.", "icon": "res://assets/items/accessories/belt.svg", "loot_enabled": true, "min_danger": 2, "spawn_weight": 14},
+"salt_amulet": {"name": "Salzamulett", "category": "Amulett", "equip_slot": "amulet", "weight": 0.2, "chaos_resistance": 5, "light_resistance": 4, "description": "Ein kleines Salzbeutelchen an einer abgebrochenen Kette.", "icon": "res://assets/items/accessories/amulet.svg", "loot_enabled": true, "min_danger": 1, "spawn_weight": 28},
+"warding_amulet": {"name": "Schutzamulett", "category": "Amulett", "equip_slot": "amulet", "rarity": "selten", "rarity_rank": 2, "weight": 0.25, "shadow_resistance": 8, "chaos_resistance": 8, "willpower": 1, "description": "Eingeritzte Zeichen, die gegen schlechte Traeume und schlimmere Dinge helfen sollen.", "icon": "res://assets/items/accessories/amulet.svg", "loot_enabled": true, "min_danger": 3, "spawn_weight": 10},
+"wire_ring": {"name": "Drahtring", "category": "Ring", "equip_slot": "ring", "weight": 0.05, "dexterity": 1, "accuracy": 1, "description": "Ein schlichter Ring aus gezogenem Draht.", "icon": "res://assets/items/accessories/ring.svg", "loot_enabled": true, "min_danger": 0, "spawn_weight": 38},
+"signet_ring": {"name": "Siegelring", "category": "Ring", "equip_slot": "ring", "rarity": "selten", "rarity_rank": 2, "weight": 0.08, "dexterity": 1, "accuracy": 2, "critical_chance": 1, "description": "Ein alter Familienring mit noch lesbarem Wappen.", "icon": "res://assets/items/accessories/ring.svg", "loot_enabled": true, "min_danger": 2, "spawn_weight": 12}
+}

@@ -1,0 +1,38 @@
+# Godot 4+
+.godot/
+.import/
+*.translation
+
+# Godot-specific
+*.uid.bak
+
+# Mono-specific
+.mono/
+data_*/
+mono_crash.*
+
+# System / IDE
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# Builds & exports (keep source, skip binaries)
+build/
+export/
+*.exe
+*.pck
+*.zip
+
+# Logs & temp
+*.log
+*.tmp
+
+# Secrets
+.env
+.env.*
+*.pem
+credentials.json

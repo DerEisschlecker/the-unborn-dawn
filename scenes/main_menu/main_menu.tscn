@@ -1,0 +1,57 @@
+[gd_scene format=3 uid="uid://balq7eisf0txa"]
+
+[ext_resource type="Script" uid="uid://c3svcay0w4vcq" path="res://scripts/main_menu/main_menu.gd" id="1_fsom3"]
+
+[node name="MainMenu" type="Control" unique_id=827364683]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_fsom3")
+
+[node name="Background" type="ColorRect" parent="." unique_id=459739368]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.03529412, 0.047058824, 0.07058824, 1)
+
+[node name="Center" type="CenterContainer" parent="Background" unique_id=187017044]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="FoundationPanel" type="VBoxContainer" parent="Background/Center" unique_id=434717712]
+custom_minimum_size = Vector2(780, 320)
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="Title" type="Label" parent="Background/Center/FoundationPanel" unique_id=1779561566]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.84705883, 0.7019608, 0.41568628, 1)
+theme_override_font_sizes/font_size = 64
+text = "LAST LIGHT"
+horizontal_alignment = 1
+
+[node name="Divider" type="HSeparator" parent="Background/Center/FoundationPanel" unique_id=612274284]
+layout_mode = 2
+
+[node name="Subtitle" type="Label" parent="Background/Center/FoundationPanel" unique_id=1668170072]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.84705883, 0.8666667, 0.9098039, 1)
+theme_override_font_sizes/font_size = 30
+text = "Die lange Nacht beginnt."
+horizontal_alignment = 1
+
+[node name="Status" type="Label" parent="Background/Center/FoundationPanel" unique_id=388774203]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5176471, 0.5647059, 0.6392157, 1)
+theme_override_font_sizes/font_size = 20
+text = "Charakter erstellen · Zuflucht sichern · Bis Tag 260 ueberleben"
+horizontal_alignment = 1
+
+[node name="Hint" type="Label" parent="Background/Center/FoundationPanel" unique_id=78790042]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7019608, 0.41960785, 0.36862746, 1)
+theme_override_font_sizes/font_size = 18
+text = "Neues Spiel, Laden und Einstellungen sind im Hauptmenue verfuegbar."
+horizontal_alignment = 1

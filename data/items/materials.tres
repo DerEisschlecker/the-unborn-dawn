@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="CatalogData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/catalog_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+entries = {
+"cloth": {"name": "Stoff", "category": "Material", "weight": 0.2, "description": "Saubere Stoffreste.", "icon": "res://assets/items/materials/cloth.svg"},
+"electronics": {"name": "Elektronikschrott", "category": "Material", "weight": 0.45, "description": "Kabel, Platinen und noch brauchbare Bauteile.", "icon": "res://assets/items/materials/electronics.svg"},
+"fuel": {"name": "Brennstoff", "category": "Material", "weight": 0.8, "description": "Eine versiegelte Flasche mit scharf riechendem Brennstoff.", "icon": "res://assets/items/materials/fuel.svg"},
+"herbs": {"name": "Heilkräuter", "category": "Material", "weight": 0.1, "description": "Bittere Kräuter mit medizinischem Nutzen.", "icon": "res://assets/items/materials/herbs.svg"},
+"metal": {"name": "Metallschrott", "category": "Material", "weight": 0.7, "description": "Verbogene, aber brauchbare Metallteile.", "icon": "res://assets/items/materials/metal.svg"},
+"nails": {"name": "Nägel", "category": "Material", "weight": 0.05, "description": "Kleine Dinge, von denen die Basis abhängt.", "icon": "res://assets/items/materials/nails.svg"},
+"powder": {"name": "Treibpulver", "category": "Material", "weight": 0.15, "description": "Trocken gelagertes Pulver für Munition.", "icon": "res://assets/items/materials/powder.svg"},
+"salt": {"name": "Grobes Salz", "category": "Material", "weight": 0.2, "description": "Konserviert Nahrung und stört manche dunklen Spuren.", "icon": "res://assets/items/materials/salt.svg"},
+"wood": {"name": "Holz", "category": "Material", "weight": 0.6, "description": "Bretter und Balken aus den Ruinen.", "icon": "res://assets/items/materials/wood.svg"}
+}

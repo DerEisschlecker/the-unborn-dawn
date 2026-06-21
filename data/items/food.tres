@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="CatalogData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/catalog_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+entries = {
+"canned_beans": {"name": "Bohnendose", "category": "Nahrung", "weight": 0.5, "effects": {"hunger": 32.0}, "use_text": "Die kalten Bohnen stillen den Hunger.", "icon": "res://assets/items/food/canned_beans.svg"},
+"canned_peaches": {"name": "Pfirsichkonserve", "category": "Nahrung", "weight": 0.55, "effects": {"hunger": 26.0, "thirst": 8.0}, "use_text": "Für einen Moment schmeckt die Welt wieder süß.", "icon": "res://assets/items/food/canned_peaches.svg"},
+"dried_meat": {"name": "Trockenfleisch", "category": "Nahrung", "weight": 0.25, "effects": {"hunger": 22.0, "stamina": 5.0}, "use_text": "Zäh, salzig und nahrhaft.", "icon": "res://assets/items/food/dried_meat.svg"},
+"energy_bar": {"name": "Energieriegel", "category": "Nahrung", "weight": 0.12, "effects": {"hunger": 14.0, "stamina": 14.0}, "use_text": "Süß, trocken und erstaunlich wirksam.", "icon": "res://assets/items/food/energy_bar.svg"}
+}

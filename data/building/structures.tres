@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="CatalogData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/catalog_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+entries = {
+"elena_shelter": {"name": "Elenas Schutzraum", "category": "Schutz", "cost": {"wood": 5, "metal": 4, "nails": 4}, "defense": 2, "description": "Reduziert direkten Schaden an Elena erheblich."},
+"infirmary": {"name": "Krankenstation", "category": "Infrastruktur", "cost": {"wood": 3, "metal": 3, "cloth": 4}, "defense": 0, "description": "Unterstuetzt Heilung und Behandlung."},
+"metal_fence": {"name": "Metallzaun", "category": "Mauer", "cost": {"metal": 6, "nails": 4}, "defense": 7, "surface_damage": 8, "description": "Stabiler Schutz gegen schwere Angreifer."},
+"noise_trap": {"name": "Laermfalle", "category": "Falle", "cost": {"metal": 2, "nails": 2, "electronics": 1}, "defense": 3, "trap_damage": 12, "description": "Lenkt die erste Angriffslinie ab und macht sie verwundbar."},
+"shrapnel_trap": {"name": "Splitterfalle", "category": "Falle", "cost": {"metal": 4, "powder": 2, "nails": 4}, "defense": 5, "trap_damage": 28, "description": "Eine riskante Ladung aus Schrott und Pulver vor der Basis."},
+"spike_trap": {"name": "Stachelfalle", "category": "Falle", "cost": {"wood": 2, "metal": 2}, "defense": 4, "trap_damage": 20, "description": "Verletzt Angreifer vor der Mauer."},
+"storage_chest": {"name": "Lagertruhe", "category": "Lager", "cost": {"wood": 4, "metal": 2, "nails": 2}, "defense": 0, "storage_weight": 100, "description": "Erweitert die Lagertraglast in der Basis um 100 kg."},
+"watchtower": {"name": "Wachturm", "category": "Turm", "cost": {"wood": 6, "metal": 2, "nails": 5}, "defense": 6, "surface_damage": 12, "description": "Wachen verursachen zusaetzlichen automatischen Schaden."},
+"wood_wall": {"name": "Holzbarrikade", "category": "Mauer", "cost": {"wood": 5, "nails": 3}, "defense": 4, "surface_damage": 5, "description": "Ein einfacher erster Schutzring."},
+"workbench": {"name": "Werkbank", "category": "Infrastruktur", "cost": {"wood": 4, "metal": 2}, "defense": 0, "description": "Ermoeglicht anspruchsvollere Rezepte."}
+}

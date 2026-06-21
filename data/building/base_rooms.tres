@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="CatalogData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/catalog_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+entries = {
+"shaft_room": {"name": "Zugangsschacht", "zone": "bunker", "description": "Die Leiter verbindet Oberflaeche und Bunker.", "unlock_cost": {}, "starts_unlocked": true, "structure_id": "", "elena_allowed": true, "rect": {"x": 0.435, "y": 0.535, "w": 0.13, "h": 0.17}},
+"workshop": {"name": "Werkstatt", "zone": "bunker", "description": "Werkbank, Werkzeuge und improvisierte Reparaturen.", "unlock_cost": {"wood": 5, "nails": 3, "metal": 2}, "starts_unlocked": false, "structure_id": "workbench", "elena_allowed": false, "rect": {"x": 0.155, "y": 0.62, "w": 0.17, "h": 0.16}},
+"infirmary": {"name": "Krankenstation", "zone": "bunker", "description": "Verbandsmaterial und Ruhe fuer Verwundete.", "unlock_cost": {"wood": 4, "cloth": 5, "bandage": 2}, "starts_unlocked": false, "structure_id": "infirmary", "elena_allowed": true, "rect": {"x": 0.155, "y": 0.79, "w": 0.17, "h": 0.14}},
+"command_post": {"name": "Leitstand", "zone": "bunker", "description": "Karten, Funk und Ueberblick ueber die Zuflucht.", "unlock_cost": {"wood": 3, "electronics": 2, "metal": 2}, "starts_unlocked": false, "structure_id": "", "elena_allowed": false, "rect": {"x": 0.40, "y": 0.72, "w": 0.20, "h": 0.15}},
+"storage_room": {"name": "Vorratskammer", "zone": "bunker", "description": "Kisten, Fasslager und erweiterte Truhe.", "unlock_cost": {"wood": 6, "nails": 4, "metal": 1}, "starts_unlocked": false, "structure_id": "storage_chest", "elena_allowed": false, "rect": {"x": 0.40, "y": 0.88, "w": 0.20, "h": 0.10}},
+"guard_post": {"name": "Wachraum", "zone": "bunker", "description": "Schlafplaetze und Ausruestung der Wachen.", "unlock_cost": {"wood": 4, "metal": 3, "nails": 2}, "starts_unlocked": false, "structure_id": "", "elena_allowed": false, "rect": {"x": 0.655, "y": 0.62, "w": 0.17, "h": 0.16}},
+"elena_quarters": {"name": "Elenas Gemach", "zone": "bunker", "description": "Ein abgeschirmter Raum fuer Elena und das Kind.", "unlock_cost": {"wood": 6, "cloth": 6, "metal": 4, "nails": 3}, "starts_unlocked": false, "structure_id": "elena_shelter", "elena_allowed": true, "rect": {"x": 0.655, "y": 0.79, "w": 0.17, "h": 0.14}},
+"surface_west_tower": {"name": "West-Turm", "zone": "surface", "description": "Hoher Aussichtsposten links der Eingangsmulde.", "unlock_cost": {"wood": 6, "nails": 4}, "starts_unlocked": false, "structure_id": "", "allowed_structures": ["watchtower"], "rect": {"x": 0.06, "y": 0.14, "w": 0.12, "h": 0.22}},
+"surface_east_tower": {"name": "Ost-Turm", "zone": "surface", "description": "Spiegelbildlicher Wachturm auf der rechten Seite.", "unlock_cost": {"wood": 6, "nails": 4}, "starts_unlocked": false, "structure_id": "", "allowed_structures": ["watchtower"], "rect": {"x": 0.82, "y": 0.14, "w": 0.12, "h": 0.22}},
+"surface_gate": {"name": "Eingangslinie", "zone": "surface", "description": "Barrikaden und Zaeune direkt vor dem Bunkertor.", "unlock_cost": {"wood": 4, "nails": 2}, "starts_unlocked": false, "structure_id": "", "allowed_structures": ["wood_wall", "metal_fence"], "rect": {"x": 0.38, "y": 0.30, "w": 0.24, "h": 0.12}},
+"surface_yard_left": {"name": "Vorfeld links", "zone": "surface", "description": "Offenes Gelaende fuer Fallen und Sperren.", "unlock_cost": {"wood": 2, "metal": 1}, "starts_unlocked": false, "structure_id": "", "allowed_structures": ["spike_trap", "noise_trap", "shrapnel_trap"], "rect": {"x": 0.18, "y": 0.36, "w": 0.14, "h": 0.14}},
+"surface_yard_center": {"name": "Vorfeld mitte", "zone": "surface", "description": "Hauptfeld vor dem Bunker – ideal fuer schwere Fallen.", "unlock_cost": {"wood": 2, "metal": 2}, "starts_unlocked": false, "structure_id": "", "allowed_structures": ["spike_trap", "noise_trap", "shrapnel_trap"], "rect": {"x": 0.42, "y": 0.42, "w": 0.16, "h": 0.12}},
+"surface_yard_right": {"name": "Vorfeld rechts", "zone": "surface", "description": "Seitlicher Angriffskorridor mit Platz fuer Abwehr.", "unlock_cost": {"wood": 2, "metal": 1}, "starts_unlocked": false, "structure_id": "", "allowed_structures": ["spike_trap", "noise_trap", "shrapnel_trap"], "rect": {"x": 0.68, "y": 0.36, "w": 0.14, "h": 0.14}}
+}

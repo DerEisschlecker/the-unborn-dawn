@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="CatalogData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/catalog_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+entries = {
+"demon_basic": {"name": "Aschenkriecher", "health": 34, "damage": 7, "speed": 2, "xp": 28, "color": "#9b443f", "damage_type": "shadow", "resistances": {"shadow_resistance": 8.0, "fire_resistance": -10.0}, "loot": ["cloth", "powder", "nails", "bandage"]},
+"demon_boss": {"name": "Siegelbrecher", "health": 150, "damage": 20, "speed": 1, "xp": 120, "color": "#d65f3f", "damage_type": "chaos", "resistances": {"physical_resistance": 12.0, "shadow_resistance": 20.0, "light_resistance": -15.0, "chaos_resistance": 10.0}, "loot": ["cleansing_salt", "rifle_ammo", "scoped_sniper_rare", "military_rucksack", "reinforced_coat"]},
+"demon_brute": {"name": "Knochenkoloss", "health": 82, "damage": 14, "speed": 1, "xp": 55, "color": "#744d4d", "damage_type": "physical", "resistances": {"physical_resistance": 15.0, "pierce_resistance": -8.0, "fire_resistance": 5.0}, "loot": ["metal", "powder", "leather_vest", "hunting_rifle", "shotgun_shell"]},
+"demon_runner": {"name": "Daemmerhetzer", "health": 25, "damage": 6, "speed": 4, "xp": 24, "color": "#a46a42", "damage_type": "slash", "resistances": {"slash_resistance": 6.0, "frost_resistance": -10.0}, "loot": ["cloth", "revolver_ammo", "service_pistol", "work_boots", "herbs"]}
+}

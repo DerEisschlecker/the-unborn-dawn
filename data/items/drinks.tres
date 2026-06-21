@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="CatalogData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/catalog_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+entries = {
+"clean_water": {"name": "Sauberes Wasser", "category": "Getränk", "weight": 0.8, "effects": {"thirst": 38.0}, "use_text": "Das Wasser schmeckt nach Metall, aber es ist sauber.", "icon": "res://assets/items/drinks/clean_water.svg"},
+"herbal_tea": {"name": "Kräutertee", "category": "Getränk", "weight": 0.5, "effects": {"thirst": 24.0, "energy": 10.0}, "use_text": "Die Wärme bringt ein wenig Ruhe zurück.", "icon": "res://assets/items/drinks/herbal_tea.svg"},
+"rainwater": {"name": "Gesammeltes Regenwasser", "category": "Getränk", "weight": 0.8, "effects": {"thirst": 22.0}, "use_text": "Es stillt den Durst, doch du traust dem Nachgeschmack nicht.", "icon": "res://assets/items/drinks/rainwater.svg"}
+}

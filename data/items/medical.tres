@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="CatalogData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/catalog_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+entries = {
+"antibiotics": {"name": "Antibiotika", "category": "Medizin", "weight": 0.2, "effects": {"health": 8.0, "infection": -30.0}, "use_text": "Die Behandlung stoppt die Entzündung.", "icon": "res://assets/items/medical/antibiotics.svg"},
+"antiseptic": {"name": "Antiseptikum", "category": "Medizin", "weight": 0.3, "effects": {"health": 5.0, "infection": -16.0}, "use_text": "Die Wunde brennt sauber.", "icon": "res://assets/items/medical/antiseptic.svg"},
+"bandage": {"name": "Bandage", "category": "Medizin", "weight": 0.15, "effects": {"health": 20.0}, "use_text": "Die Blutung ist gestillt.", "icon": "res://assets/items/medical/bandage.svg"},
+"cleansing_salt": {"name": "Reinigungssalz", "category": "Medizin", "weight": 0.25, "effects": {"health": 5.0, "infection": -20.0}, "use_text": "Das Salz brennt kalt und vertreibt die dunklen Spuren.", "icon": "res://assets/items/medical/cleansing_salt.svg"},
+"painkillers": {"name": "Schmerzmittel", "category": "Medizin", "weight": 0.12, "effects": {"health": 10.0, "stamina": 8.0}, "use_text": "Der Schmerz rückt weit genug weg, um weiterzumachen.", "icon": "res://assets/items/medical/painkillers.svg"}
+}

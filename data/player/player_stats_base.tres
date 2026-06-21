@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="CatalogData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/catalog_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+entries = {
+"base": {
+"stats": {"health": 100.0, "max_health": 100.0, "shield": 0.0, "mana": 40.0, "max_mana": 40.0, "hunger": 86.0, "thirst": 82.0, "stamina": 100.0, "max_stamina": 100.0, "energy": 100.0, "max_energy": 100.0, "infection": 0.0, "level": 1, "xp": 0, "next_xp": 60, "skill_points": 0, "strength": 5.0, "dexterity": 5.0, "intelligence": 3.0, "vitality": 5.0, "willpower": 4.0, "melee": 0.0, "ranged": 0.0, "accuracy": 0.0, "defense": 0.0, "crafting": 0.0, "precision": 0.0, "evasion": 0.0, "block_chance": 0.0, "parry_chance": 0.0, "control_resist": 0.0, "critical_chance": 0.0, "critical_damage": 0.0, "critical_resist": 0.0, "critical_protection": 0.0, "physical_resistance": 0.0, "pierce_resistance": 0.0, "slash_resistance": 0.0, "ranged_resistance": 0.0, "explosive_resistance": 0.0, "magic_resistance": 0.0, "fire_resistance": 0.0, "frost_resistance": 0.0, "lightning_resistance": 0.0, "poison_resistance": 0.0, "acid_resistance": 0.0, "bleed_resistance": 0.0, "light_resistance": 0.0, "shadow_resistance": 0.0, "soul_resistance": 0.0, "chaos_resistance": 0.0, "life_steal": 0.0, "mana_steal": 0.0, "thorns": 0.0, "luck": 0.0, "cooldown_reduction": 0.0, "buff_power": 0.0, "debuff_power": 0.0, "armor_pierce": 0.0, "magic_pierce": 0.0, "shield_strength": 0.0, "healing_power": 0.0, "area_damage_bonus": 0.0},
+"elena": {"health": 100.0, "max_health": 100.0, "stress": 18.0},
+"base": {"integrity": 100.0, "max_integrity": 100.0, "structures": {}},
+"starting_backpack": "small_backpack",
+"starting_inventory": {"bandage": 2, "canned_beans": 2, "clean_water": 2, "rusty_knife": 1},
+"classes": {
+"scout": {"name": "Kundschafter", "description": "Schnell, aufmerksam und gut fuer lange Wege.", "stat_bonus": {"dexterity": 2.0, "willpower": 1.0, "max_stamina": 15.0, "stamina": 15.0, "energy": 8.0, "melee": 1.0, "accuracy": 1.0}, "starting_inventory": {"cloth": 2, "flashlight_battery": 1}, "ability": {"name": "Schattenlauf", "description": "Fuehrt einen schnellen Treffer aus und halbiert den naechsten Gegenschlag."}},
+"medic": {"name": "Sanitaeter", "description": "Haelt Wunden klein und Elena laenger stabil.", "stat_bonus": {"willpower": 2.0, "vitality": 1.0, "max_health": 8.0, "health": 8.0, "max_energy": 4.0, "energy": 4.0, "defense": 1.0}, "starting_inventory": {"painkillers": 1, "herbs": 2}, "ability": {"name": "Notversorgung", "description": "Heilt im Kampf und entfernt eine frische Verunreinigung, wenn moeglich."}},
+"guardian": {"name": "Verteidiger", "description": "Beginnt mit mehr Schutz und einer lauten Antwort.", "stat_bonus": {"strength": 1.0, "vitality": 2.0, "shield": 12.0, "max_health": 6.0, "health": 6.0, "defense": 2.0}, "starting_inventory": {"old_revolver": 1, "revolver_ammo": 6}, "ability": {"name": "Schildwall", "description": "Faengt den naechsten Angriff stark ab und kontert mit stabilem Schaden."}},
+"tinker": {"name": "Bastler", "description": "Macht aus Schrott schneller brauchbare Ausruestung.", "stat_bonus": {"intelligence": 2.0, "dexterity": 1.0, "energy": 10.0, "max_energy": 10.0, "crafting": 2.0}, "starting_inventory": {"metal": 2, "nails": 4}, "ability": {"name": "Improvisierte Ladung", "description": "Verwandelt Schrott in einen schweren Treffer, wenn Material vorhanden ist."}}
+}
+}
+}

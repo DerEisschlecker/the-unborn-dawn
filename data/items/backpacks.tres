@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="CatalogData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/catalog_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+entries = {
+"small_backpack": {"name": "Kleiner Rucksack", "category": "Rucksack", "weight": 0.8, "capacity_slots": 6, "max_weight": 22.0, "description": "Ein enger Notrucksack mit sechs nutzbaren Faecherplaetzen.", "icon": "res://assets/items/backpacks/small_backpack.svg"},
+"scavenger_pack": {"name": "Pluenderer-Rucksack", "category": "Rucksack", "weight": 1.2, "capacity_slots": 9, "max_weight": 30.0, "description": "Zusammengeflickt, aber mit deutlich mehr Griffweite.", "icon": "res://assets/items/backpacks/scavenger_pack.svg"},
+"hiker_backpack": {"name": "Wanderrucksack", "category": "Rucksack", "weight": 1.8, "capacity_slots": 12, "max_weight": 38.0, "description": "Stabile Gurte und genug Platz fuer laengere Streifzuege.", "icon": "res://assets/items/backpacks/hiker_backpack.svg"},
+"military_rucksack": {"name": "Militaerrucksack", "category": "Rucksack", "weight": 2.6, "capacity_slots": 16, "max_weight": 48.0, "description": "Schwer, robust und fuer eine ganze Nacht draussen gemacht.", "icon": "res://assets/items/backpacks/military_rucksack.svg"}
+}

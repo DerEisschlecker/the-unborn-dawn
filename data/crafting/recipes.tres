@@ -1,0 +1,41 @@
+[gd_resource type="Resource" script_class="CatalogData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/catalog_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+entries = {
+"antibiotics": {"name": "Antibiotika mischen", "inputs": {"herbs": 3, "clean_water": 1}, "output": "antibiotics", "amount": 1, "level": 1},
+"antiseptic": {"name": "Antiseptikum mischen", "inputs": {"herbs": 2, "fuel": 1, "clean_water": 1}, "output": "antiseptic", "amount": 1, "level": 1},
+"bandage": {"name": "Bandage wickeln", "inputs": {"cloth": 2}, "output": "bandage", "amount": 1, "level": 0},
+"clean_water": {"name": "Wasser reinigen", "inputs": {"wood": 1}, "output": "clean_water", "amount": 1, "level": 0},
+"cleansing_salt": {"name": "Reinigungssalz herstellen", "inputs": {"herbs": 2, "powder": 1}, "output": "cleansing_salt", "amount": 1, "level": 1},
+"crowbar": {"name": "Brecheisen schmieden", "inputs": {"metal": 4}, "output": "crowbar", "amount": 1, "level": 1},
+"dried_meat": {"name": "Fleisch trocknen", "inputs": {"wood": 1, "canned_beans": 1}, "output": "dried_meat", "amount": 2, "level": 0},
+"fire_axe": {"name": "Feueraxt zusammensetzen", "inputs": {"wood": 2, "metal": 5, "nails": 2}, "output": "fire_axe", "amount": 1, "level": 1},
+"herbal_tea": {"name": "Kraeutertee kochen", "inputs": {"herbs": 1, "clean_water": 1}, "output": "herbal_tea", "amount": 1, "level": 0},
+"hiker_backpack": {"name": "Wanderrucksack verstaerken", "inputs": {"cloth": 6, "metal": 2, "nails": 4}, "output": "hiker_backpack", "amount": 1, "level": 1},
+"leather_vest": {"name": "Lederweste verstaerken", "inputs": {"cloth": 5, "metal": 3}, "output": "leather_vest", "amount": 1, "level": 1},
+"machete": {"name": "Buschmachete schleifen", "inputs": {"metal": 4, "cloth": 1}, "output": "machete", "amount": 1, "level": 1},
+"military_rucksack": {"name": "Militaerrucksack fertigen", "inputs": {"cloth": 8, "metal": 5, "electronics": 1}, "output": "military_rucksack", "amount": 1, "level": 2},
+"nails": {"name": "Naegel formen", "inputs": {"metal": 1}, "output": "nails", "amount": 4, "level": 0},
+"patched_jacket": {"name": "Jacke flicken", "inputs": {"cloth": 4, "nails": 1}, "output": "patched_jacket", "amount": 1, "level": 0},
+"reinforced_coat": {"name": "Mantel verstaerken", "inputs": {"cloth": 7, "metal": 5}, "output": "reinforced_coat", "amount": 1, "level": 1},
+"reinforced_pants": {"name": "Hose verstaerken", "inputs": {"cloth": 4, "metal": 2}, "output": "reinforced_pants", "amount": 1, "level": 1},
+"respirator_mask": {"name": "Atemmaske bauen", "inputs": {"cloth": 2, "electronics": 1, "metal": 1}, "output": "respirator_mask", "amount": 1, "level": 1},
+"revolver_ammo": {"name": "Revolvermunition laden", "inputs": {"metal": 1, "powder": 1}, "output": "revolver_ammo", "amount": 6, "level": 1},
+"rifle_ammo": {"name": "Gewehrmunition laden", "inputs": {"metal": 2, "powder": 1}, "output": "rifle_ammo", "amount": 4, "level": 1},
+"rusty_knife": {"name": "Messer schleifen", "inputs": {"metal": 2, "cloth": 1}, "output": "rusty_knife", "amount": 1, "level": 0},
+"scavenger_pack": {"name": "Pluenderer-Rucksack naehen", "inputs": {"cloth": 4, "nails": 2}, "output": "scavenger_pack", "amount": 1, "level": 0},
+"scrap_helmet": {"name": "Schrotthelm nieten", "inputs": {"metal": 3, "nails": 2}, "output": "scrap_helmet", "amount": 1, "level": 0},
+"scrap_shield": {"name": "Schrottschild zusammennageln", "inputs": {"wood": 3, "metal": 4, "nails": 2}, "output": "scrap_shield", "amount": 1, "level": 0},
+"reinforced_shield": {"name": "Schild verstaerken", "inputs": {"scrap_shield": 1, "metal": 3, "nails": 3}, "output": "reinforced_shield", "amount": 1, "level": 1},
+"shotgun_shell": {"name": "Schrotpatronen laden", "inputs": {"metal": 2, "powder": 2}, "output": "shotgun_shell", "amount": 4, "level": 1},
+"signal_flare": {"name": "Signalrakete bauen", "inputs": {"metal": 1, "powder": 2, "fuel": 1}, "output": "signal_flare", "amount": 1, "level": 1},
+"work_boots": {"name": "Arbeitsstiefel reparieren", "inputs": {"cloth": 2, "metal": 1}, "output": "work_boots", "amount": 1, "level": 0},
+"leather_belt": {"name": "Werkzeugguertel naehen", "inputs": {"cloth": 3, "nails": 1}, "output": "leather_belt", "amount": 1, "level": 0},
+"reinforced_belt": {"name": "Trageguertel verstaerken", "inputs": {"leather_belt": 1, "metal": 2, "nails": 2}, "output": "reinforced_belt", "amount": 1, "level": 1},
+"salt_amulet": {"name": "Salzamulett binden", "inputs": {"cleansing_salt": 1, "herbs": 1, "cloth": 1}, "output": "salt_amulet", "amount": 1, "level": 0},
+"wire_ring": {"name": "Drahtring formen", "inputs": {"metal": 1, "nails": 1}, "output": "wire_ring", "amount": 1, "level": 0},
+"work_gloves": {"name": "Arbeitshandschuhe naehen", "inputs": {"cloth": 2}, "output": "work_gloves", "amount": 1, "level": 0}
+}

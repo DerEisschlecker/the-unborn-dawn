@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="CatalogData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/catalog_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+entries = {
+"schedule": {"first_day": 7, "interval": 7, "tier_days": 45, "base_count": 3, "count_growth_days": 20, "finale_bonus": 14}
+}
+

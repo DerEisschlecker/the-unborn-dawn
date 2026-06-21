@@ -1,0 +1,29 @@
+[gd_resource type="Resource" script_class="CatalogData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/catalog_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+entries = {
+"act_2": {"title": "AKT II · DIE MAUER ATMET", "slides": [
+{"heading": "Tag 60", "text": "Die Angriffe folgen keinem Zufall mehr. Jede Nacht prüfen sie dieselben schwachen Stellen der Zuflucht.", "image": "res://assets/environments/base_scenes/base_evening_painted.png"},
+{"heading": "Ein fremdes Zeichen", "text": "Im Radio nennt eine unbekannte Stimme den Namen des Ordens. Sie behauptet, das geöffnete Siegel könne noch geschlossen werden.", "image": "res://assets/environments/backgrounds/military_painted.png"}
+]},
+"act_3": {"title": "AKT III · DIE BELAGERUNG", "slides": [
+{"heading": "Tag 180", "text": "Elena schläft kaum noch. Unter der Stadt antwortet etwas auf den Herzschlag ihres Kindes.", "image": "res://assets/environments/backgrounds/elena_story_painted.png"},
+{"heading": "Die letzte Vorbereitung", "text": "Jede Barrikade, jede Patrone und jeder Mensch in der Zuflucht wird in der längsten Nacht gebraucht werden.", "image": "res://assets/environments/base_scenes/base_evening_painted.png"}
+]},
+"finale": {"title": "THE LONGEST NIGHT", "slides": [
+{"heading": "Morgen", "text": "Als der letzte Schatten fällt, beginnt Elena zu schreien. Nicht aus Angst. Das Kind kommt.", "image": "res://assets/environments/backgrounds/elena_story_painted.png"},
+{"heading": "Das erste Licht", "text": "Mit dem ersten Atemzug des Kindes verstummen die Stimmen unter der Erde. Am Horizont erscheint ein Streifen Gold.", "image": "res://assets/environments/backgrounds/menu_ruins.png"},
+{"heading": "LAST LIGHT", "text": "Ihr habt nicht die alte Welt gerettet. Aber ihr habt einer neuen erlaubt, geboren zu werden.", "image": "res://assets/environments/backgrounds/menu_ruins.png"}
+]},
+"game_over": {"title": "DAS LICHT ERLISCHT", "slides": [
+{"heading": "Ende", "text": "Die Zuflucht verstummt. Was hier geschützt werden sollte, erreicht den Morgen nicht.", "image": "res://assets/environments/backgrounds/menu_ruins.png"}
+]},
+"prologue": {"title": "PROLOG · DIE VERSCHLINGUNG", "slides": [
+{"heading": "Das geöffnete Siegel", "text": "Der Orden wollte die Grenze zwischen den Welten berühren. Stattdessen riss er sie auf.", "image": "res://assets/environments/backgrounds/menu_ruins.png"},
+{"heading": "Wochen später", "text": "Städte brannten ohne Feuer. Stimmen kamen aus leeren Radios. Die Menschheit zog sich hinter Bretter und Gebete zurück.", "image": "res://assets/environments/backgrounds/menu_ruins.png"},
+{"heading": "Tag 1", "text": "Morgan findet Elena in den Ruinen. Verwundet. Hochschwanger. Neben ihr liegt eine Notiz: Das ungeborene Kind ist die letzte Antwort auf die Dunkelheit.", "image": "res://assets/environments/backgrounds/elena_story_painted.png"}
+]}
+}

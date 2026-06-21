@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="CatalogData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/catalog_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+entries = {
+"flashlight_battery": {"name": "Taschenlampenbatterie", "category": "Sonstiges", "weight": 0.18, "description": "Noch fast voll. Ein kleines Stück verlässliches Licht.", "icon": "res://assets/items/misc/flashlight_battery.svg"},
+"radio_parts": {"name": "Funkgeräteteile", "category": "Sonstiges", "weight": 0.65, "description": "Spulen, Schalter und eine intakte Frequenzanzeige.", "icon": "res://assets/items/misc/radio_parts.svg"},
+"signal_flare": {"name": "Signalrakete", "category": "Sonstiges", "weight": 0.35, "description": "Rotes Licht für Rettung oder Ablenkung.", "icon": "res://assets/items/misc/signal_flare.svg"}
+}

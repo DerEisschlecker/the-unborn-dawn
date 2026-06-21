@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="CatalogData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/catalog_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+entries = {
+"revolver_ammo": {"name": "Revolvermunition", "category": "Munition", "weight": 0.08, "description": "Eine einzelne Patrone.", "icon": "res://assets/items/ammo/revolver_ammo.svg"},
+"rifle_ammo": {"name": "Gewehrmunition", "category": "Munition", "weight": 0.1, "description": "Eine Patrone für das Jagdgewehr.", "icon": "res://assets/items/ammo/rifle_ammo.svg"},
+"shotgun_shell": {"name": "Schrotpatrone", "category": "Munition", "weight": 0.12, "description": "Rote Hülse, grobe Ladung.", "icon": "res://assets/items/ammo/shotgun_shell.svg"}
+}

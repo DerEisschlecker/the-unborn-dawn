@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="CatalogData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/catalog_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+entries = {
+"leather_vest": {"name": "Verstaerkte Lederweste", "category": "Ruestung", "equip_slot": "vest", "weight": 3.0, "shield": 20, "armor": 7, "pocket_slots": 2, "carry_weight_bonus": 3.0, "description": "Mehrere Schichten Leder und Metallplatten.", "icon": "res://assets/items/armor/leather_vest.svg"},
+"patched_jacket": {"name": "Geflickte Jacke", "category": "Kleidung", "equip_slot": "jacket", "weight": 1.8, "armor": 3, "max_stamina_bonus": 3, "pocket_slots": 3, "carry_weight_bonus": 2.0, "description": "Warm, leise und an den Ellbogen verstaerkt.", "icon": "res://assets/items/armor/patched_jacket.svg"},
+"reinforced_coat": {"name": "Verstaerkter Mantel", "category": "Ruestung", "equip_slot": "jacket", "weight": 4.0, "shield": 32, "armor": 9, "pocket_slots": 4, "carry_weight_bonus": 5.0, "description": "Ein schwerer Mantel mit eingenaehten Metallplatten.", "icon": "res://assets/items/armor/reinforced_coat.svg"},
+"reinforced_pants": {"name": "Verstaerkte Hose", "category": "Kleidung", "equip_slot": "pants", "weight": 2.0, "armor": 4, "pocket_slots": 2, "carry_weight_bonus": 2.0, "description": "Dicker Stoff mit aufgenaehten Schutzplatten.", "icon": "res://assets/items/armor/reinforced_pants.svg"},
+"respirator_mask": {"name": "Atemmaske", "category": "Maske", "equip_slot": "mask", "weight": 0.9, "armor": 1, "infection_resist": 18, "description": "Filtert Staub, Rauch und das meiste, was nicht in Lungen gehoert.", "icon": "res://assets/items/armor/respirator_mask.svg"},
+"scrap_helmet": {"name": "Schrotthelm", "category": "Helm", "equip_slot": "head", "weight": 1.7, "armor": 5, "description": "Nicht bequem, aber der Kopf bleibt dort, wo er hingehoert.", "icon": "res://assets/items/armor/scrap_helmet.svg"},
+"work_boots": {"name": "Arbeitsstiefel", "category": "Schuhe", "equip_slot": "shoes", "weight": 1.4, "armor": 2, "stamina_bonus": 2, "description": "Stabile Sohlen fuer Schutt, Glas und lange Wege.", "icon": "res://assets/items/armor/work_boots.svg"},
+"work_gloves": {"name": "Arbeitshandschuhe", "category": "Handschuhe", "equip_slot": "gloves", "weight": 0.6, "armor": 1, "crafting_bonus": 1, "description": "Schuetzen Finger beim Bauen, Pluendern und Reparieren.", "icon": "res://assets/items/armor/work_gloves.svg"},
+"scrap_shield": {"name": "Schrottschild", "category": "Schild", "equip_slot": "shield", "weight": 2.8, "shield": 18, "armor": 3, "block_chance": 1, "description": "Ein verbeultes Schild aus Metallplatten und Holz.", "icon": "res://assets/ui/icons/shield.svg", "loot_enabled": true, "min_danger": 1, "spawn_weight": 34},
+"reinforced_shield": {"name": "Verstaerktes Schild", "category": "Schild", "equip_slot": "shield", "rarity": "selten", "rarity_rank": 2, "weight": 3.4, "shield": 32, "armor": 5, "block_chance": 2, "physical_resistance": 4, "description": "Mehrere Schichten Stahl, die auch schwere Treffer abfangen.", "icon": "res://assets/ui/icons/shield.svg", "loot_enabled": true, "min_danger": 3, "spawn_weight": 12}
+}
