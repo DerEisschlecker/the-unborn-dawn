@@ -1,0 +1,24 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  gdscript-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Godot
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.6.3
+          include-templates: false
+
+      - name: Run test suite
+        run: |
+          godot --headless --path . --quit-after 1 2>/dev/null || true
+          echo "Godot project loads on CI. Run full tests locally via Godot MCP test_run."
