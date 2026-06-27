@@ -7,6 +7,18 @@ Aktueller Stand: Vollständiger spielbarer Vertical Slice (Kampagne Tag 1–260 
 - `GAMEPLAY_GUIDE.md` erklärt Ziel und Bedienung.
 - `ASSET_REPLACEMENT_GUIDE.md` erklärt den Austausch eigener Grafiken und Sounds.
 - `CHANGELOG.md` listet die umgesetzten Funktionen.
+- `balancing_notes.md` enthält Balancing-Hinweise.
 - Kurze Format-Hinweise befinden sich außerdem als `README.txt` in jedem Medienordner.
+
+## Projektstruktur
+
+- `scenes/` – Szenen (.tscn), gespiegelt durch `scripts/`
+- `autoload/` – globale Singletons (GameState, InventorySystem, …)
+- `data/` – Spielinhalte als `.tres`-Kataloge
+- `assets/` – Grafiken, Audio, UI-Assets
+- `ui/themes/` – globales UI-Theme
+- `tests/` – Laufzeit-Tests
+- `tools/` – Entwickler-Skripte (z. B. GitHub-Publish)
+- `addons/` – Drittanbieter (Godot MCP)
 
 Eine getestete Windows-Version liegt unter `build/Last_Light.exe`. Die danebenliegende Datei `Last_Light.pck` muss beim Weitergeben im selben Ordner bleiben.

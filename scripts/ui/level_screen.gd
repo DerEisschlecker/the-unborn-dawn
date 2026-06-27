@@ -23,7 +23,8 @@ var compact_screen := false
 
 
 func _ready() -> void:
-	compact_screen = UiFactory.is_compact_screen()
+	AudioManager.play_scene_music("level")
+	compact_screen = UiFactory.is_compact_screen(self)
 	var root := setup_gameplay("LEVEL & FAEHIGKEITEN", "Passive Punkte, Hauptfaehigkeiten und Belegung der Leiste 1-9.")
 	if compact_screen:
 		_compact_root_typography(root)
@@ -38,7 +39,7 @@ func _ready() -> void:
 		back.custom_minimum_size.y = 36
 	root.add_child(back)
 	EventBus.stats_changed.connect(_refresh)
-	_refresh()
+	call_deferred("_refresh")
 
 
 func _build_wide_layout(root: VBoxContainer) -> void:
@@ -302,7 +303,7 @@ func _refresh_skills() -> void:
 		grid.add_theme_constant_override("v_separation", 5)
 		skill_box.add_child(grid)
 		for group in [
-			["strength", "dexterity", "intelligence", "vitality", "willpower"],
+			["strength", "dexterity", "intelligence", "vitality", "willpower", "initiative"],
 			["accuracy", "melee", "ranged", "defense", "crafting"],
 			["max_health", "max_mana", "max_stamina", "max_energy", "critical_chance", "armor_pierce", "control_resist"]
 		]:
@@ -310,7 +311,7 @@ func _refresh_skills() -> void:
 				grid.add_child(_skill_row(stat_name, points))
 		return
 	for group in [
-		["strength", "dexterity", "intelligence", "vitality", "willpower"],
+		["strength", "dexterity", "intelligence", "vitality", "willpower", "initiative"],
 		["accuracy", "melee", "ranged", "defense", "crafting"],
 		["max_health", "max_mana", "max_stamina", "max_energy", "critical_chance", "armor_pierce", "control_resist"]
 	]:
@@ -355,9 +356,9 @@ func _hotbar_slot(index: int) -> Button:
 	button.text = label
 	button.custom_minimum_size = Vector2(80, 58) if compact_screen else Vector2(92, 72)
 	button.pressed.connect(func() -> void:
-		AudioManager.play_sfx("res://assets/audio/sfx/ui/click.wav", -7.0)
 		_hotbar_clicked(index)
 	)
+	UiFactory.wire_button_sound(button)
 	button.configure_hotbar(ability_id, index, not ability_id.is_empty(), str(data.get("name", ability_id)))
 	button.ability_dropped.connect(_ability_dropped_on_slot)
 	button.tooltip_text = "Leerer Slot. Ziehe eine gelernte Faehigkeit hierher." if ability_id.is_empty() else GameState.ability_tooltip_text(ability_id) + "\nZiehen: auf anderen Slot legen\nLinksklick: aufnehmen/tauschen\nRechtsklick: Slot leeren"
@@ -392,7 +393,7 @@ func _refresh_ability_detail() -> void:
 		ability_detail_icon.texture = null
 		ability_detail_label.text = "Waehle eine gelernte Faehigkeit oder ziehe sie direkt auf einen Slot."
 		return
-	ability_detail_icon.texture = load(str(data.get("icon", "res://assets/ui/icons/energy.svg")))
+	ability_detail_icon.texture = load(str(data.get("icon", UiFactory.stat_icon_path("energy"))))
 	var learned := GameState.learned_abilities.has(ability_id)
 	var equipped_slot := GameState.equipped_abilities.find(ability_id)
 	var status := "Gelernt" if learned else "Nicht gelernt"
@@ -435,7 +436,7 @@ func _ability_card(data: Dictionary) -> PanelContainer:
 	row.add_theme_constant_override("separation", 10)
 	panel.add_child(row)
 	var icon := TextureRect.new()
-	icon.texture = load(str(data.get("icon", "res://assets/ui/icons/energy.svg")))
+	icon.texture = load(str(data.get("icon", UiFactory.stat_icon_path("energy"))))
 	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	icon.custom_minimum_size = Vector2(46, 46)
@@ -460,9 +461,9 @@ func _ability_card(data: Dictionary) -> PanelContainer:
 		button.text = button_text
 		button.custom_minimum_size = Vector2(126, 52)
 		button.pressed.connect(func() -> void:
-			AudioManager.play_sfx("res://assets/audio/sfx/ui/click.wav", -7.0)
 			callback.call()
 		)
+		UiFactory.wire_button_sound(button)
 		button.configure_drag(ability_id, -1, true, str(data.get("name", ability_id)))
 	else:
 		button = UiFactory.button(button_text, callback, 126)

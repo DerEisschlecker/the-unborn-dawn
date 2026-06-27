@@ -1,8 +1,9 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3 uid="uid://gxtxbm503gg8"]
 
-[ext_resource type="Script" path="res://scripts/ui/trader_screen.gd" id="1"]
+[ext_resource type="Script" uid="uid://3oh2ij0ukmjp" path="res://scripts/ui/trader_screen.gd" id="1"]
+[ext_resource type="PackedScene" uid="uid://bw56mm0m2hy21" path="res://scenes/ui/hud.tscn" id="2_hud"]
 
-[node name="TraderScreen" type="Control"]
+[node name="TraderScreen" type="Control" unique_id=509646690]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -10,3 +11,8 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1")
+
+[node name="HUD" parent="." unique_id=1547883203 instance=ExtResource("2_hud")]
+layout_mode = 1
+offset_top = 0.0
+theme = null

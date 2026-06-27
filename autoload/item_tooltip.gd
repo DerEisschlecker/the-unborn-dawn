@@ -145,6 +145,8 @@ func _stats_text(item_id: String, data: Dictionary) -> String:
 	if data.has("equip_slot"):
 		var slot := str(data.get("equip_slot", ""))
 		lines.append("[color=#8e9aab]Slot:[/color] %s" % InventorySystem.EQUIPMENT_SLOTS.get(slot, {}).get("name", slot))
+	if bool(data.get("two_handed", false)):
+		lines.append("[color=#d8a070]Zweihand[/color] — blockiert Schild und zweite Waffe")
 	for key in ["damage", "armor", "shield", "strength", "dexterity", "intelligence", "vitality", "willpower", "accuracy", "stamina_bonus", "max_stamina_bonus", "pocket_slots", "carry_weight_bonus"]:
 		if data.has(key):
 			lines.append("%s: [color=#f0dca9]%s[/color]" % [_stat_name(key), _value_text(float(data.get(key, 0.0)))])

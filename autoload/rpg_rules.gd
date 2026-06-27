@@ -103,7 +103,7 @@ func default_player_stats() -> Dictionary:
 		"mana": 40.0, "max_mana": 40.0,
 		"hunger": 86.0, "thirst": 82.0, "stamina": 100.0,
 		"energy": 100.0, "max_stamina": 100.0, "max_energy": 100.0,
-		"infection": 0.0, "level": 1, "xp": 0, "next_xp": 60, "skill_points": 0,
+		"infection": 0.0, "level": 1, "xp": 0, "next_xp": 60, "skill_points": 0, "initiative": 0.0,
 		"melee": 0.0, "ranged": 0.0, "accuracy": 0.0, "defense": 0.0, "crafting": 0.0
 	}
 	for key in PRIMARY_ATTRIBUTES:
@@ -148,6 +148,7 @@ func effective_stats(base_stats: Dictionary, bonuses: Dictionary = {}) -> Dictio
 	stats.healing_power = float(stats.healing_power) + float(stats.willpower) * 1.2
 	stats.armor_pierce = float(stats.armor_pierce) + float(stats.strength) * 0.25
 	stats.magic_pierce = float(stats.magic_pierce) + float(stats.intelligence) * 0.3
+	stats.initiative = float(stats.get("initiative", 0.0)) + float(stats.dexterity) * 0.65 + float(stats.willpower) * 0.25
 	stats.poison_resistance = float(stats.poison_resistance) + float(stats.vitality) * 0.6
 	stats.bleed_resistance = float(stats.bleed_resistance) + float(stats.vitality) * 0.5
 	return stats
@@ -162,6 +163,7 @@ func enemy_stats(enemy_data: Dictionary) -> Dictionary:
 	stats.vitality = float(enemy_data.get("vitality", 4.0)) + float(enemy_data.get("health", 30.0)) * 0.035
 	stats.willpower = float(enemy_data.get("willpower", 4.0))
 	stats.accuracy = float(enemy_data.get("accuracy", 0.0)) + float(enemy_data.get("speed", 1.0))
+	stats.initiative = float(enemy_data.get("initiative", 0.0)) + float(enemy_data.get("speed", 1.0)) * 2.5
 	stats.melee = float(enemy_data.get("damage", 6.0)) * 0.35
 	stats.ranged = float(enemy_data.get("ranged", 0.0))
 	var resistances: Dictionary = enemy_data.get("resistances", {})

@@ -9,6 +9,7 @@ var feedback: Label
 
 func _ready() -> void:
 	GameState.return_scene = "res://scenes/base/base_scene.tscn"
+	AudioManager.play_scene_music("build")
 	var root := setup_gameplay("BAUPLAN", "Jede Struktur kann mehrfach ausgebaut werden. Kosten bleiben leicht lesbar in den Daten-Dateien.")
 	feedback = UiFactory.body_label("Wähle ein Bauprojekt.", 18, UiFactory.COLOR_MUTED)
 	root.add_child(feedback)
@@ -43,7 +44,7 @@ func _refresh() -> void:
 		], 14)
 		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(label)
-		var button := UiFactory.button("Bauen", func() -> void: _build(str(structure_id)), 150)
+		var button := UiFactory.button("Bauen", func() -> void: _build(str(structure_id)), 150, AudioManager.UiClickKind.CONFIRM)
 		button.custom_minimum_size = Vector2(130, 42)
 		button.disabled = not InventorySystem.has_items(data.get("cost", {}))
 		row.add_child(button)

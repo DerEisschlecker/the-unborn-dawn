@@ -51,10 +51,16 @@ func _build() -> void:
 	grid.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	grid.add_theme_constant_override("h_separation", 6)
 	grid.add_theme_constant_override("v_separation", 6)
+	grid.mouse_filter = Control.MOUSE_FILTER_PASS
 	box.add_child(grid)
 
 
 func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
+	if ItemDragDrop.is_item_payload(data):
+		var payload: Dictionary = data
+		if zone == "sell":
+			return str(payload.get("source", "")) in ["backpack", "storage", "equipment", "quick", "combat_quick", "player"]
+		return false
 	if typeof(data) != TYPE_DICTIONARY:
 		return false
 	var payload: Dictionary = data
@@ -62,6 +68,11 @@ func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
 
 
 func _drop_data(_at_position: Vector2, data: Variant) -> void:
+	if ItemDragDrop.is_item_payload(data):
+		var payload: Dictionary = data
+		if drop_callback.is_valid():
+			drop_callback.call(zone, str(payload.get("item_id", "")), str(payload.get("source", "")))
+		return
 	if not _can_drop_data(_at_position, data):
 		return
 	var payload: Dictionary = data

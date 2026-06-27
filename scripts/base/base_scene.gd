@@ -1,91 +1,233 @@
-# Purpose: Central refuge screen with interactive bunker map, room unlocks, and surface defense placement.
-# Public API: Opens sub-systems, handles room/surface clicks on BaseVisual.
-# Dependencies: GameplayScreen, GameState, TimeSystem, InventorySystem, BaseVisual.
+# Purpose: Central refuge screen with full-screen bunker cutaway and floating UI panels.
+# Public API: Opens sub-systems, handles room/surface clicks on the 3D fortress view.
+# Dependencies: GameplayScreen, GameState, TimeSystem, InventorySystem, BaseFortressView.
 extends GameplayScreen
 
-const BASE_VISUAL := preload("res://scripts/base/base_visual.gd")
+const BASE_VIEW := preload("res://scripts/base/base_fortress_view.gd")
 
 var status_label: Label
 var action_label: Label
 var action_box: VBoxContainer
-var base_art: BaseVisual
+var base_art: Control
+var report_panel: PanelContainer
+var actions_panel: PanelContainer
+var hint_label: Label
+var hotspot_layer: Control
 var selected_zone := ""
 
 
 func _ready() -> void:
 	GameState.current_location = "base"
-	var compact_screen := UiFactory.is_compact_screen()
-	AudioManager.play_music(
-		"res://assets/audio/music/ambient_night/below_the_walls.wav" if TimeSystem.is_night()
-		else "res://assets/audio/music/ambient_day/fragile_morning.wav",
-		-11.0
-	)
-	var root := setup_gameplay("ZUFLUCHT MORGENROT", "Klicke Raeume zum Freischalten. Oben: Verteidigungsanlagen platzieren.")
-	if compact_screen:
-		_compact_root_typography(root)
-	var overview := UiFactory.section("Bunker & Oberflaeche")
-	overview.get_parent().size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	overview.get_parent().size_flags_vertical = Control.SIZE_EXPAND_FILL
-	root.add_child(overview.get_parent())
-	base_art = BASE_VISUAL.new()
-	base_art.name = "BaseVisual"
-	overview.add_child(base_art)
-	base_art.room_selected.connect(_on_room_selected)
-	base_art.surface_selected.connect(_on_surface_selected)
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	theme = UiFactory.DARK_THEME
+	clear_dynamic_children()
+	AudioManager.play_scene_music("base")
+	_build_canvas()
+	attach_hud()
+	_build_report_panel()
+	_build_actions_panel()
+	_build_hint_label()
+	_position_panels()
 	EventBus.stats_changed.connect(_refresh)
 	EventBus.inventory_changed.connect(_refresh)
-	var lower := HBoxContainer.new()
-	lower.add_theme_constant_override("separation", 8 if compact_screen else 14)
-	lower.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	root.add_child(lower)
-	var report := UiFactory.section("Lagebericht")
-	report.get_parent().size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	lower.add_child(report.get_parent())
-	status_label = UiFactory.body_label(_status_text(), 12 if compact_screen else 18)
-	report.add_child(status_label)
-	action_label = UiFactory.body_label("Klicke einen ausgegrauten Raum oder ein Vorfeld.", 11 if compact_screen else 16, UiFactory.COLOR_MUTED)
-	report.add_child(action_label)
+	base_art.room_selected.connect(_on_room_selected)
+	base_art.surface_selected.connect(_on_surface_selected)
+	_refresh()
+	call_deferred("_position_panels")
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_SIZE_CHANGED:
+		_position_panels()
+		_position_hotspots()
+
+
+func _build_canvas() -> void:
+	base_art = BASE_VIEW.new()
+	base_art.name = "BaseFortressView"
+	base_art.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	base_art.mouse_filter = Control.MOUSE_FILTER_STOP
+	add_child(base_art)
+	move_child(base_art, 0)
+	var shade := ColorRect.new()
+	shade.color = Color(0.015, 0.018, 0.024, 0.06)
+	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(shade)
+	move_child(shade, 1)
+	hotspot_layer = Control.new()
+	hotspot_layer.name = "HotspotLayer"
+	hotspot_layer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	hotspot_layer.mouse_filter = Control.MOUSE_FILTER_PASS
+	add_child(hotspot_layer)
+	move_child(hotspot_layer, 2)
+
+
+func _build_report_panel() -> void:
+	var compact := UiFactory.is_compact_screen(self)
+	report_panel = PanelContainer.new()
+	report_panel.name = "ReportPanel"
+	report_panel.add_theme_stylebox_override("panel", _glass_panel_style())
+	add_child(report_panel)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 6 if compact else 8)
+	report_panel.add_child(box)
+	box.add_child(UiFactory.title_label("ZUFLUCHT MORGENROT", 22 if compact else 28))
+	box.add_child(UiFactory.body_label("Oberflaeche: Tuerme & Vorfelder. Unten: Bunkerraeume.", 11 if compact else 13, UiFactory.COLOR_MUTED))
+	status_label = UiFactory.body_label(_status_text(), 11 if compact else 14)
+	status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	box.add_child(status_label)
+	action_label = UiFactory.body_label("Klicke einen Raum oder ein Vorfeld.", 11 if compact else 13, UiFactory.COLOR_MUTED)
+	action_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	box.add_child(action_label)
 	action_box = VBoxContainer.new()
 	action_box.add_theme_constant_override("separation", 5)
-	report.add_child(action_box)
-	var actions := UiFactory.section("Schnellaktionen")
-	actions.get_parent().custom_minimum_size.x = 420 if compact_screen else 500
-	lower.add_child(actions.get_parent())
-	var action_parent: Control = actions
-	if compact_screen:
-		var grid := GridContainer.new()
-		grid.columns = 2
-		grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		grid.add_theme_constant_override("h_separation", 6)
-		grid.add_theme_constant_override("v_separation", 5)
-		actions.add_child(grid)
-		action_parent = grid
-	_add_action_button(action_parent, "Bauplan (alt)", func() -> void: go_to("res://scenes/base/build_menu.tscn"), compact_screen)
-	_add_action_button(action_parent, "Crafting", open_crafting, compact_screen)
-	_add_action_button(action_parent, "Inventar", open_inventory, compact_screen)
-	_add_action_button(action_parent, "Ausruestung", open_equipment, compact_screen)
-	_add_action_button(action_parent, "Elena", func() -> void: go_to("res://scenes/characters/elena.tscn"), compact_screen)
-	_add_action_button(action_parent, "Schlafen", _sleep, compact_screen)
-	_add_action_button(action_parent, "Karte", func() -> void: go_to("res://scenes/world_map/world_map.tscn"), compact_screen)
-	_refresh()
+	box.add_child(action_box)
 
 
-func _compact_root_typography(root: VBoxContainer) -> void:
-	root.add_theme_constant_override("separation", 6)
-	var label_index := 0
-	for child in root.get_children():
-		if child is Label:
-			var label := child as Label
-			label.add_theme_font_size_override("font_size", 28 if label_index == 0 else 12)
-			label_index += 1
-		elif child is HSeparator:
-			child.custom_minimum_size.y = 2
+func _build_actions_panel() -> void:
+	var compact := UiFactory.is_compact_screen(self)
+	actions_panel = PanelContainer.new()
+	actions_panel.name = "ActionsPanel"
+	actions_panel.add_theme_stylebox_override("panel", _glass_panel_style())
+	add_child(actions_panel)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 5 if compact else 6)
+	actions_panel.add_child(box)
+	box.add_child(UiFactory.title_label("Schnellaktionen", 18 if compact else 22))
+	var grid := GridContainer.new()
+	grid.columns = 1
+	grid.add_theme_constant_override("v_separation", 4)
+	box.add_child(grid)
+	if OS.is_debug_build():
+		_add_action_button(grid, "Bauplan (alt)", func() -> void: go_to("res://scenes/base/build_menu.tscn"), compact)
+	_add_action_button(grid, "Crafting", open_crafting, compact)
+	_add_action_button(grid, "Inventar", open_inventory, compact)
+	_add_action_button(grid, "Elena", func() -> void: go_to("res://scenes/characters/elena.tscn"), compact)
+	_add_action_button(grid, "Schlafen", _sleep, compact)
+	_add_action_button(grid, "Karte", func() -> void: go_to("res://scenes/world_map/world_map.tscn"), compact)
+	_build_scene_hotspots()
+
+
+func _build_hint_label() -> void:
+	hint_label = UiFactory.body_label("Klicke Raeume zum Freischalten. Oben: Verteidigungsanlagen.", 12, UiFactory.COLOR_MUTED)
+	hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	hint_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(hint_label)
+
+
+func _build_scene_hotspots() -> void:
+	_add_hotspot("workshop", "Crafting", open_crafting, GameState.is_room_unlocked("workshop"))
+	_add_hotspot("storage_room", "Lager", open_inventory, GameState.is_room_unlocked("storage_room"))
+	_add_hotspot("elena_quarters", "Elena", func() -> void: go_to("res://scenes/characters/elena.tscn"), GameState.is_room_unlocked("elena_quarters"))
+	_add_hotspot("shaft_room", "Karte", func() -> void: go_to("res://scenes/world_map/world_map.tscn"), true)
+	_add_hotspot("command_post", "Schlafen", _sleep, GameState.is_room_unlocked("command_post"))
+
+
+func _add_hotspot(room_id: String, label: String, callback: Callable, hotspot_visible: bool) -> void:
+	var data := DataCatalog.base_room(room_id)
+	if data.is_empty():
+		return
+	var button := UiFactory.button(label, callback, 96)
+	button.name = "Hotspot_%s" % room_id
+	button.visible = hotspot_visible
+	button.modulate = Color(1.0, 1.0, 1.0, 0.88)
+	button.add_theme_font_size_override("font_size", 10)
+	button.custom_minimum_size = Vector2(88, 28)
+	button.mouse_filter = Control.MOUSE_FILTER_STOP
+	button.set_meta("room_id", room_id)
+	hotspot_layer.add_child(button)
+
+
+func _position_panels() -> void:
+	var compact := UiFactory.is_compact_screen(self)
+	var top := 96.0 if compact else 118.0
+	var bottom_inset := float(UiFactory.hud_bottom_inset(self, 14 if compact else 18))
+	var margin := 14.0 if compact else 18.0
+	var report_width := 360.0 if compact else 410.0
+	var actions_width := 170.0 if compact else 196.0
+	if is_instance_valid(report_panel):
+		report_panel.set_anchors_and_offsets_preset(Control.PRESET_LEFT_WIDE)
+		report_panel.offset_left = margin
+		report_panel.offset_right = margin + report_width
+		report_panel.offset_top = top
+		report_panel.offset_bottom = -bottom_inset
+	if is_instance_valid(actions_panel):
+		actions_panel.set_anchors_and_offsets_preset(Control.PRESET_RIGHT_WIDE)
+		actions_panel.offset_left = -actions_width - margin
+		actions_panel.offset_right = -margin
+		actions_panel.offset_top = top
+		actions_panel.offset_bottom = -bottom_inset
+	if is_instance_valid(hint_label):
+		hint_label.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+		hint_label.offset_top = top - (28 if compact else 34)
+		hint_label.offset_bottom = top - 4
+		hint_label.offset_left = report_width + margin * 2.0
+		hint_label.offset_right = -(actions_width + margin * 2.0)
+	_position_hotspots()
+
+
+func _position_hotspots() -> void:
+	if not is_instance_valid(base_art):
+		return
+	var canvas := base_art.size
+	if canvas.x <= 1.0 or canvas.y <= 1.0:
+		canvas = UiFactory.viewport_size(self)
+	for child in hotspot_layer.get_children():
+		if not child.name.begins_with("Hotspot_"):
+			continue
+		var room_id := str(child.get_meta("room_id", ""))
+		var data := DataCatalog.base_room(room_id)
+		if data.is_empty():
+			continue
+		var rect := _room_rect(data, canvas)
+		child.position = rect.position + Vector2((rect.size.x - child.size.x) * 0.5, rect.size.y - child.custom_minimum_size.y - 6.0)
+		child.visible = _hotspot_visible(room_id)
+
+
+func _hotspot_visible(room_id: String) -> bool:
+	match room_id:
+		"workshop":
+			return GameState.is_room_unlocked("workshop")
+		"storage_room":
+			return GameState.is_room_unlocked("storage_room")
+		"elena_quarters":
+			return GameState.is_room_unlocked("elena_quarters")
+		"command_post":
+			return GameState.is_room_unlocked("command_post")
+		"shaft_room":
+			return true
+	return false
+
+
+func _room_rect(data: Dictionary, canvas: Vector2) -> Rect2:
+	var rect: Dictionary = data.get("rect", {})
+	return Rect2(
+		float(rect.get("x", 0.0)) * canvas.x,
+		float(rect.get("y", 0.0)) * canvas.y,
+		float(rect.get("w", 0.1)) * canvas.x,
+		float(rect.get("h", 0.1)) * canvas.y
+	)
+
+
+func _glass_panel_style() -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.012, 0.014, 0.018, 0.48)
+	style.border_color = Color(0.62, 0.48, 0.26, 0.62)
+	style.set_border_width_all(1)
+	style.set_corner_radius_all(4)
+	style.content_margin_left = 12
+	style.content_margin_right = 12
+	style.content_margin_top = 10
+	style.content_margin_bottom = 10
+	return style
 
 
 func _add_action_button(parent: Control, text: String, callback: Callable, compact_screen: bool) -> void:
-	var button := UiFactory.button(text, callback, 200 if compact_screen else 230)
+	var button := UiFactory.button(text, callback, 160 if compact_screen else 176)
 	if compact_screen:
-		button.custom_minimum_size.y = 34
+		button.custom_minimum_size.y = 32
 	parent.add_child(button)
 
 
@@ -102,7 +244,7 @@ func _on_surface_selected(slot_id: String) -> void:
 func _refresh_action_panel() -> void:
 	UiFactory.clear_container(action_box)
 	if selected_zone.is_empty():
-		action_label.text = "Klicke einen ausgegrauten Raum oder ein Vorfeld."
+		action_label.text = "Klicke einen Raum oder ein Vorfeld."
 		return
 	var data := DataCatalog.base_room(selected_zone)
 	if data.is_empty():
@@ -180,8 +322,7 @@ func _status_text() -> String:
 func _refresh() -> void:
 	status_label.text = _status_text()
 	_refresh_action_panel()
-	if is_instance_valid(base_art):
-		base_art.queue_redraw()
+	_position_hotspots()
 
 
 func _sleep() -> void:

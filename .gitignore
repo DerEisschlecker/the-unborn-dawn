@@ -19,6 +19,7 @@ Thumbs.db
 *~
 .vscode/
 .idea/
+.cursor/
 
 # Builds & exports (keep source, skip binaries)
 build/

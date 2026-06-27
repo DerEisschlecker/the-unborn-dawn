@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="CatalogData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/catalog_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+entries = {
+"bunker_wall": {"category": "wall", "max_hp": 90.0, "defense_weight": 1.2, "color": [0.28, 0.27, 0.26]},
+"bunker_floor": {"category": "structure", "max_hp": 140.0, "defense_weight": 0.4, "color": [0.22, 0.21, 0.20]},
+"wood_palisade": {"category": "wall", "max_hp": 45.0, "defense_weight": 0.8, "color": [0.34, 0.24, 0.14]},
+"watchtower_wood": {"category": "structure", "max_hp": 70.0, "defense_weight": 1.5, "color": [0.30, 0.22, 0.13]},
+"metal_door": {"category": "door", "max_hp": 120.0, "defense_weight": 2.0, "color": [0.42, 0.44, 0.46]},
+"sandbag_wall": {"category": "wall", "max_hp": 55.0, "defense_weight": 1.0, "color": [0.36, 0.32, 0.22]},
+"hedgehog": {"category": "prop", "max_hp": 35.0, "defense_weight": 0.6, "color": [0.25, 0.25, 0.27]},
+"crate": {"category": "prop", "max_hp": 25.0, "defense_weight": 0.2, "color": [0.32, 0.24, 0.15]},
+"shed_wall": {"category": "wall", "max_hp": 40.0, "defense_weight": 0.5, "color": [0.28, 0.20, 0.12]},
+"antenna": {"category": "prop", "max_hp": 30.0, "defense_weight": 0.1, "color": [0.45, 0.46, 0.48]},
+"ritual_floor": {"category": "structure", "max_hp": 60.0, "defense_weight": 0.3, "color": [0.35, 0.08, 0.06]}
+}

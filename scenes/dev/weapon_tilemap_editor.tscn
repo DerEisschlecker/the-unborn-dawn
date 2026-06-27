@@ -1,0 +1,30 @@
+[gd_scene format=3 uid="uid://dugg1mex3cgvy"]
+
+[ext_resource type="Script" uid="uid://dpdkub6jtue0h" path="res://scripts/dev/weapon_tilemap_editor.gd" id="1"]
+[ext_resource type="TileSet" uid="uid://pfc72ulaa7l4" path="res://resources/tilesets/weapon_tileset.tres" id="2_tileset"]
+
+[node name="WeaponTilemapEditor" type="Node2D" unique_id=394675600]
+script = ExtResource("1")
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=566397750]
+position = Vector2(512, 340)
+zoom = Vector2(0.55, 0.55)
+
+[node name="WeaponLayout" type="TileMapLayer" parent="." unique_id=1778200019]
+tile_set = ExtResource("2_tileset")
+
+[node name="WeaponCatalog" type="TileMapLayer" parent="." unique_id=1950658888]
+position = Vector2(0, 700)
+tile_set = ExtResource("2_tileset")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1801284961]
+
+[node name="InfoLabel" type="Label" parent="CanvasLayer" unique_id=662437232]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 1016.0
+offset_bottom = 96.0
+theme_override_colors/font_color = Color(0.82, 0.86, 0.92, 1)
+theme_override_font_sizes/font_size = 13
+text = "TILESET EDITOR: WeaponLayout waehlen > unten Tab \"TileSet\" > Setup: Bereiche auf dem Sheet markieren > Select: item_id setzen > Paint: Tiles platzieren. Root > Setup Manual Sheet falls leer."
+autowrap_mode = 3

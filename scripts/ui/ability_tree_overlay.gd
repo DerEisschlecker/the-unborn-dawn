@@ -19,7 +19,7 @@ func refresh_tree(selected_id: String = "") -> void:
 	selected_ability_id = selected_id
 	UiFactory.clear_container(self)
 	node_positions.clear()
-	if UiFactory.is_compact_screen():
+	if UiFactory.is_compact_screen(self):
 		_refresh_compact_tree()
 		return
 	var levels := _tree_levels()
@@ -126,7 +126,7 @@ func _add_ability_node(data: Dictionary, level_index: int, row_index: int) -> vo
 	top.add_theme_constant_override("separation", 6)
 	box.add_child(top)
 	var icon := TextureRect.new()
-	icon.texture = load(str(data.get("icon", "res://assets/ui/icons/energy.svg")))
+	icon.texture = load(str(data.get("icon", UiFactory.stat_icon_path("energy"))))
 	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	icon.custom_minimum_size = Vector2(34, 34)
@@ -153,9 +153,9 @@ func _add_ability_node(data: Dictionary, level_index: int, row_index: int) -> vo
 		action.text = "Auswaehlen / Ziehen"
 		action.custom_minimum_size = Vector2(140, 30)
 		action.pressed.connect(func() -> void:
-			AudioManager.play_sfx("res://assets/audio/sfx/ui/click.wav", -7.0)
 			ability_selected.emit(ability_id)
 		)
+		UiFactory.wire_button_sound(action)
 		action.configure_drag(ability_id, -1, true, str(data.get("name", ability_id)))
 	else:
 		action = UiFactory.button("Lernen" if unlocked else "Gesperrt", func() -> void: learn_requested.emit(ability_id), 140)
@@ -201,7 +201,7 @@ func _add_compact_ability_node(data: Dictionary, ability_index: int, columns: in
 	row.add_theme_constant_override("separation", 5)
 	panel.add_child(row)
 	var icon := TextureRect.new()
-	icon.texture = load(str(data.get("icon", "res://assets/ui/icons/energy.svg")))
+	icon.texture = load(str(data.get("icon", UiFactory.stat_icon_path("energy"))))
 	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	icon.custom_minimum_size = Vector2(28, 28)
@@ -229,9 +229,9 @@ func _add_compact_ability_node(data: Dictionary, ability_index: int, columns: in
 		action.text = "OK"
 		action.custom_minimum_size = Vector2(46, 26)
 		action.pressed.connect(func() -> void:
-			AudioManager.play_sfx("res://assets/audio/sfx/ui/click.wav", -7.0)
 			ability_selected.emit(ability_id)
 		)
+		UiFactory.wire_button_sound(action)
 		action.configure_drag(ability_id, -1, true, str(data.get("name", ability_id)))
 	else:
 		action = UiFactory.button("Lern" if unlocked else "Lvl", func() -> void: learn_requested.emit(ability_id), 46)

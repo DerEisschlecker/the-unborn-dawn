@@ -19,6 +19,14 @@ signal message_posted(text: String)
 signal save_completed(slot: int)
 @warning_ignore("unused_signal")
 signal game_over(reason: String)
+@warning_ignore("unused_signal")
+signal base_wave_damage(amount: float)
+@warning_ignore("unused_signal")
+signal stat_preview_changed(projected: Dictionary)
+@warning_ignore("unused_signal")
+signal stat_preview_cleared
+@warning_ignore("unused_signal")
+signal display_settings_changed
 
 
 func post_message(text: String) -> void:

@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="CatalogData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/catalog_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+entries = {
+"roadside_cache": {"title": "Wegkreuz", "intro": "Jemand hat eine kleine Kiste unter Steinen versteckt.", "choices": [
+	{"label": "Kiste oeffnen", "reward": {"items": {"canned_beans": 1, "cloth": 1}}, "message": "Proviant und Stoff - ein gluecklicher Fund."},
+	{"label": "Ignorieren", "message": "Du laesst die Kiste unberuehrt."}
+]},
+"broken_cart": {"title": "Umgekippte Karre", "intro": "Eine Handelskarre liegt quer auf dem Pfad.", "choices": [
+	{"label": "Nach brauchbaren Teilen suchen", "reward": {"items": {"wood": 2, "nails": 2}}, "cost": {"stamina": 6.0}, "message": "Du bergen brauchbares Holz und Naegel."},
+	{"label": "Karre zur Seite schieben", "cost": {"stamina": 4.0}, "message": "Der Weg ist wieder frei."}
+]},
+"lost_refugee": {"title": "Hilfesuchender", "intro": "Eine erschöpfte Gestalt bittet um Wasser.", "choices": [
+	{"label": "Wasser geben", "cost": {"items": {"clean_water": 1}}, "reward": {"money": 10, "stats": {"energy": 4.0}}, "message": "Als Dank gibt dir die Person ein paar Dawn-Credits."},
+	{"label": "Ablehnen", "stress": 2.0, "message": "Du gehst weiter. Es fuehlt sich schwer an."}
+]},
+"static_storm": {"title": "Funkstoerung", "intro": "Das Rauschen auf deinem Funkgeraet wird lauter.", "choices": [
+	{"label": "Geraet abschirmen und weiter", "cost": {"stamina": 5.0}, "message": "Du kaempfst dich durch die Stoerung."},
+	{"label": "Kurz Schutz suchen", "reward": {"stats": {"shield": 6.0}}, "message": "Hinter Beton bist du sicherer."}
+]},
+"scavenger_ambush": {"title": "Hinterhalt", "intro": "Aus einem Truemmerhaufen springt eine kriechende Silhouette.", "choices": [
+	{"label": "Zurueckschlagen", "reward": {"items": {"metal": 1}}, "damage": 8.0, "message": "Du gewinnst knapp, sicherst aber Schrott."},
+	{"label": "Fliehen", "cost": {"stamina": 12.0}, "stress": 5.0, "message": "Du entkommst erschöpft."}
+]}
+}

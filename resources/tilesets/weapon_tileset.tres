@@ -1,0 +1,12 @@
+[gd_resource type="TileSet" format=3 uid="uid://pfc72ulaa7l4"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_sheet"]
+
+[resource]
+custom_data_layer_0/name = "item_id"
+custom_data_layer_0/type = 4
+custom_data_layer_1/name = "display_name"
+custom_data_layer_1/type = 4
+custom_data_layer_2/name = "description"
+custom_data_layer_2/type = 4
+sources/0 = SubResource("TileSetAtlasSource_sheet")

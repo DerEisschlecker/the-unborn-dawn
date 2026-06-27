@@ -7,15 +7,29 @@ var item_id := ""
 var source := ""
 var amount := 0
 var unit_price := 0
+var cart_amount := 0
 var click_callback: Callable
+var drop_callback: Callable
+var _click_armed := false
+var _drag_started := false
 
 
-func configure(new_item_id: String, new_amount: int, new_source: String, new_price: int, new_callback: Callable) -> void:
+func configure(
+	new_item_id: String,
+	new_amount: int,
+	new_source: String,
+	new_price: int,
+	new_callback: Callable,
+	new_cart_amount: int = 0,
+	new_drop_callback: Callable = Callable()
+) -> void:
 	item_id = new_item_id
 	amount = new_amount
 	source = new_source
 	unit_price = new_price
+	cart_amount = new_cart_amount
 	click_callback = new_callback
+	drop_callback = new_drop_callback
 	_build()
 
 
@@ -25,10 +39,12 @@ func _build() -> void:
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	var data := DataCatalog.item(item_id)
-	UiFactory.apply_item_rarity_frame(self, item_id, false, Color(0.025, 0.028, 0.034, 0.95), 5)
-	UiFactory.attach_item_tooltip(self, item_id, amount, unit_price, "Kaufen" if source == "trader" or source == "buy" else "Verkaufen")
+	var in_cart := cart_amount > 0 or source in ["buy", "sell"]
+	UiFactory.apply_item_rarity_frame(self, item_id, in_cart, Color(0.025, 0.028, 0.034, 0.95), 5)
+	UiFactory.attach_item_tooltip(self, item_id, amount, unit_price, _tooltip_context())
 	var stack := Control.new()
 	stack.custom_minimum_size = Vector2(88, 62)
+	stack.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(stack)
 	var icon := TextureRect.new()
 	icon.texture = load(str(data.get("icon", "res://icon.svg")))
@@ -39,16 +55,21 @@ func _build() -> void:
 	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	stack.add_child(icon)
 	var amount_label := Label.new()
-	amount_label.text = "x%d" % amount
+	if cart_amount > 0 and source == "player":
+		amount_label.text = "x%d (%d)" % [amount, cart_amount]
+	elif source in ["buy", "sell"]:
+		amount_label.text = "x%d" % amount
+	else:
+		amount_label.text = "x%d" % amount
 	amount_label.add_theme_font_size_override("font_size", 11)
-	amount_label.add_theme_color_override("font_color", Color.WHITE)
+	amount_label.add_theme_color_override("font_color", Color.WHITE if cart_amount <= 0 else UiFactory.COLOR_GOLD)
 	amount_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	amount_label.vertical_alignment = VERTICAL_ALIGNMENT_TOP
 	amount_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	amount_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	stack.add_child(amount_label)
 	var price := Label.new()
-	price.text = "%d C" % unit_price
+	price.text = "%d DC" % unit_price
 	price.add_theme_font_size_override("font_size", 11)
 	price.add_theme_color_override("font_color", UiFactory.COLOR_GOLD)
 	price.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -58,35 +79,37 @@ func _build() -> void:
 	stack.add_child(price)
 
 
-func _tooltip(data: Dictionary) -> String:
-	var lines: Array[String] = [
-		str(data.get("name", item_id)),
-		"%s - %s" % [data.get("category", "Item"), UiFactory.rarity_label(data)],
-		"Wert: %d C   Preis: %d C" % [DataCatalog.item_value(item_id), unit_price]
-	]
-	if not str(data.get("description", "")).is_empty():
-		lines.append(str(data.get("description", "")))
-	if data.has("effects"):
-		var effect_parts: Array[String] = []
-		var effects: Dictionary = data.get("effects", {})
-		for stat_name in effects:
-			effect_parts.append("%s %+d" % [str(stat_name).capitalize(), int(effects[stat_name])])
-		lines.append("Benutzen: %s" % ", ".join(effect_parts))
-	if data.has("damage"):
-		lines.append("Schaden: %d" % int(data.get("damage", 0)))
-	if data.has("armor"):
-		lines.append("Ruestung: %d" % int(data.get("armor", 0)))
-	return "\n".join(lines)
+func _tooltip_context() -> String:
+	match source:
+		"trader", "buy":
+			return "Kaufen (Links +1, Rechts alle)"
+		"player", "sell":
+			return "Verkaufen (Links +1, Rechts alle)"
+	return "Handel"
 
 
 func _gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		if click_callback.is_valid():
-			click_callback.call(item_id, source)
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		if event.pressed:
+			_click_armed = true
+			_drag_started = false
+		elif _click_armed and click_callback.is_valid():
+			_click_armed = false
+			if not _drag_started:
+				accept_event()
+				click_callback.call(item_id, source, event)
 
 
 func _get_drag_data(_at_position: Vector2) -> Variant:
 	if item_id.is_empty() or amount <= 0:
+		return null
+	_drag_started = true
+	_click_armed = false
+	if source == "player":
+		var preview := ItemDragDrop.create_drag_preview(item_id)
+		set_drag_preview(preview)
+		return ItemDragDrop.make_payload("backpack", item_id, item_id)
+	if source not in ["trader", "buy", "sell"]:
 		return null
 	var preview := TextureRect.new()
 	preview.texture = load(str(DataCatalog.item(item_id).get("icon", "res://icon.svg")))
@@ -95,3 +118,36 @@ func _get_drag_data(_at_position: Vector2) -> Variant:
 	preview.custom_minimum_size = Vector2(52, 52)
 	set_drag_preview(preview)
 	return {"kind": "trade_item", "item_id": item_id, "source": source}
+
+
+func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
+	return drop_callback.is_valid() and _accepts_drop(data)
+
+
+func _drop_data(_at_position: Vector2, data: Variant) -> void:
+	if not _accepts_drop(data):
+		return
+	var payload: Dictionary = data
+	if drop_callback.is_valid():
+		drop_callback.call(str(payload.get("item_id", "")), str(payload.get("source", "")))
+
+
+func _accepts_drop(data: Variant) -> bool:
+	if typeof(data) != TYPE_DICTIONARY:
+		return false
+	var payload: Dictionary = data
+	if ItemDragDrop.is_item_payload(data):
+		match source:
+			"sell":
+				return str(payload.get("source", "")) in ["player", "backpack", "trader"]
+			"buy":
+				return str(payload.get("source", "")) in ["trader", "backpack"]
+		return false
+	if str(payload.get("kind", "")) != "trade_item":
+		return false
+	match source:
+		"sell":
+			return str(payload.get("source", "")) in ["player", "backpack", "trader"]
+		"buy":
+			return str(payload.get("source", "")) in ["trader", "backpack"]
+	return false

@@ -1,5 +1,5 @@
 # Purpose: Stores the weighted player inventory independently of the current scene.
-# Public API: add_item(), remove_item(), has_items(), consume_cost(), use_item(), serialize(), restore().
+# Public API: add_item(), remove_item(), has_items(), consume_cost(), has_craft_materials(), take_craft_materials(), use_item(), serialize(), restore().
 # Dependencies: DataCatalog and EventBus.
 extends Node
 
@@ -32,7 +32,7 @@ const EQUIPMENT_SLOTS := {
 	"shield": {"name": "Schild", "order": 75},
 	"tool": {"name": "Axt / Werkzeug", "order": 80},
 	"melee": {"name": "Nahkampfwaffe", "order": 90},
-	"firearm": {"name": "Waffe / Pistole", "order": 100},
+	"firearm": {"name": "Fernkampf", "order": 100},
 	"throwable": {"name": "Wurfgegenstand", "order": 110},
 	"ring": {"name": "Ring", "order": 120},
 	"belt": {"name": "Guertel", "order": 130},
@@ -40,6 +40,7 @@ const EQUIPMENT_SLOTS := {
 }
 
 const CLOTHING_CONTAINER_SLOTS := ["jacket", "vest", "pants"]
+const WEAPON_EQUIP_SLOTS := ["firearm", "melee", "tool"]
 const SORT_CATEGORY_ORDER := {
 	"Rucksack": 10,
 	"Waffe": 20,
@@ -47,6 +48,7 @@ const SORT_CATEGORY_ORDER := {
 	"Maschinenpistole": 22,
 	"Sniper": 23,
 	"Fernkampf": 24,
+	"Zweihand": 24,
 	"Nahkampf": 25,
 	"Wurfgegenstand": 26,
 	"Munition": 30,
@@ -199,6 +201,22 @@ func equip_item(item_id: String) -> bool:
 	if int(items.get(item_id, 0)) <= 0:
 		EventBus.post_message("Dieser Gegenstand liegt nicht im Rucksack.")
 		return false
+	if not item_fits_equipment_slot(item_id, slot):
+		EventBus.post_message(slot_mismatch_message(item_id, slot))
+		return false
+	if slot == "shield" and not equipped_two_handed_weapon().is_empty():
+		EventBus.post_message("Mit Zweihandwaffe kein Schild moeglich.")
+		return false
+	if is_two_handed(item_id):
+		for conflict_slot in _two_hand_conflict_slots(slot):
+			if equipped_item(conflict_slot).is_empty():
+				continue
+			if not unequip_slot(conflict_slot):
+				EventBus.post_message("Kein Platz fuer abzulegende Ausruestung.")
+				return false
+	elif slot in WEAPON_EQUIP_SLOTS and not equipped_two_handed_weapon().is_empty():
+		EventBus.post_message("Zuerst Zweihandwaffe ablegen.")
+		return false
 	remove_item(item_id, 1)
 	var old_item := str(equipment.get(slot, ""))
 	if not old_item.is_empty():
@@ -236,6 +254,76 @@ func equipped_item(slot: String) -> String:
 	return str(equipment.get(slot, ""))
 
 
+func is_two_handed(item_id: String) -> bool:
+	return bool(DataCatalog.item(item_id).get("two_handed", false))
+
+
+func equipped_two_handed_weapon() -> String:
+	for slot in WEAPON_EQUIP_SLOTS:
+		var item_id := equipped_item(slot)
+		if not item_id.is_empty() and is_two_handed(item_id):
+			return item_id
+	return ""
+
+
+func is_slot_blocked(slot_id: String) -> bool:
+	var two_handed_id := equipped_two_handed_weapon()
+	if two_handed_id.is_empty():
+		return false
+	if slot_id == "shield":
+		return true
+	var primary_slot := str(DataCatalog.item(two_handed_id).get("equip_slot", ""))
+	if slot_id in WEAPON_EQUIP_SLOTS and slot_id != primary_slot:
+		return true
+	return false
+
+
+func slot_block_reason(slot_id: String) -> String:
+	if not is_slot_blocked(slot_id):
+		return ""
+	if slot_id == "shield":
+		return "Zweihandwaffe blockiert den Schild-Slot."
+	return "Zweihandwaffe blockiert diesen Waffen-Slot."
+
+
+func is_ranged_weapon_item(item_id: String) -> bool:
+	return str(DataCatalog.item(item_id).get("equip_slot", "")) == "firearm"
+
+
+func is_melee_weapon_item(item_id: String) -> bool:
+	return str(DataCatalog.item(item_id).get("equip_slot", "")) == "melee"
+
+
+func item_fits_equipment_slot(item_id: String, slot: String) -> bool:
+	var data := DataCatalog.item(item_id)
+	if data.is_empty():
+		return false
+	var item_slot := str(data.get("equip_slot", ""))
+	if item_slot != slot:
+		return false
+	match slot:
+		"firearm":
+			return is_ranged_weapon_item(item_id)
+		"melee":
+			return is_melee_weapon_item(item_id)
+		_:
+			return true
+
+
+func slot_mismatch_message(item_id: String, slot: String) -> String:
+	var data := DataCatalog.item(item_id)
+	var item_slot := str(data.get("equip_slot", ""))
+	if slot == "firearm":
+		if item_slot == "melee":
+			return "Nahkampfwaffen gehoeren in den Nahkampf-Slot."
+		return "Nur Fernkampfwaffen passen in den Fernkampf-Slot."
+	if slot == "melee":
+		if item_slot == "firearm":
+			return "Fernkampfwaffen gehoeren in den Fernkampf-Slot."
+		return "Nur Nahkampfwaffen passen in den Nahkampf-Slot."
+	return "Passt nicht in diesen Ausruestungsslot."
+
+
 func total_equipment_bonus(bonus_name: String) -> float:
 	var total := 0.0
 	for slot in equipment:
@@ -262,6 +350,27 @@ func equipment_stat_bonuses() -> Dictionary:
 
 func armor_value() -> float:
 	return total_equipment_bonus("armor") + total_equipment_bonus("shield") * 0.35
+
+
+func projected_equipment_stat_bonuses(replace_slot: String, item_id: String) -> Dictionary:
+	var totals := {}
+	for slot in equipment:
+		var equipped_id := str(equipment[slot])
+		if slot == replace_slot:
+			equipped_id = item_id
+		if equipped_id.is_empty():
+			continue
+		var data := DataCatalog.item(equipped_id)
+		for key in data:
+			if typeof(data[key]) == TYPE_INT or typeof(data[key]) == TYPE_FLOAT:
+				if _is_stat_bonus_key(str(key)):
+					totals[key] = float(totals.get(key, 0.0)) + float(data[key])
+	return totals
+
+
+func projected_armor_value(replace_slot: String, item_id: String) -> float:
+	var bonuses := projected_equipment_stat_bonuses(replace_slot, item_id)
+	return float(bonuses.get("armor", 0.0)) + float(bonuses.get("shield", 0.0)) * 0.35
 
 
 func attack_candidates() -> Array[String]:
@@ -299,6 +408,64 @@ func consume_cost(cost: Dictionary) -> bool:
 	for item_id in cost:
 		remove_item(item_id, int(cost[item_id]))
 	return true
+
+
+func backpack_count(item_id: String) -> int:
+	return int(items.get(item_id, 0))
+
+
+func storage_count(item_id: String) -> int:
+	return int(storage_items.get(item_id, 0))
+
+
+func crafting_uses_storage(return_scene: String = "") -> bool:
+	var scene_path := return_scene if not return_scene.is_empty() else str(GameState.return_scene)
+	if scene_path.contains("/base/"):
+		return true
+	return GameState.current_location == "base"
+
+
+func available_craft_count(item_id: String, use_storage: bool) -> int:
+	var total := backpack_count(item_id)
+	if use_storage:
+		total += storage_count(item_id)
+	return total
+
+
+func has_craft_materials(cost: Dictionary, use_storage: bool) -> bool:
+	for item_id in cost:
+		if available_craft_count(str(item_id), use_storage) < int(cost[item_id]):
+			return false
+	return true
+
+
+func take_craft_materials(cost: Dictionary, use_storage: bool) -> Dictionary:
+	if not has_craft_materials(cost, use_storage):
+		return {}
+	var plan := {"backpack": {}, "storage": {}}
+	for item_id in cost:
+		var key := str(item_id)
+		var needed := int(cost[item_id])
+		var from_backpack := mini(needed, backpack_count(key))
+		if from_backpack > 0:
+			remove_item(key, from_backpack)
+			plan["backpack"][key] = from_backpack
+			needed -= from_backpack
+		if needed > 0:
+			if not use_storage or storage_count(key) < needed:
+				restore_craft_materials(plan)
+				return {}
+			_remove_storage_direct(key, needed)
+			plan["storage"][key] = needed
+	return plan
+
+
+func restore_craft_materials(plan: Dictionary) -> void:
+	for item_id in plan.get("backpack", {}):
+		_add_item_direct(str(item_id), int(plan["backpack"][item_id]))
+	for item_id in plan.get("storage", {}):
+		_add_storage_direct(str(item_id), int(plan["storage"][item_id]))
+	EventBus.inventory_changed.emit()
 
 
 func current_weight() -> float:
@@ -650,6 +817,48 @@ func combat_item_action_points(item_id: String) -> int:
 	return clampi(cost, 1, 3)
 
 
+func combat_healing_item(item_id: String) -> bool:
+	if not usable_item(item_id):
+		return false
+	var effects: Dictionary = DataCatalog.item(item_id).get("effects", {})
+	if float(effects.get("health", 0.0)) > 0.0:
+		return true
+	if float(effects.get("infection", 0.0)) < 0.0:
+		return true
+	return str(DataCatalog.item(item_id).get("category", "")) == "Medizin" and not effects.is_empty()
+
+
+func healing_combat_items() -> Array[String]:
+	var result: Array[String] = []
+	for item_id in ordered_items():
+		var key := str(item_id)
+		if combat_healing_item(key) and not result.has(key):
+			result.append(key)
+	return result
+
+
+func travel_food_drink_items() -> Array[String]:
+	var result: Array[String] = []
+	for item_id in ordered_items():
+		var key := str(item_id)
+		var data := DataCatalog.item(key)
+		var category := str(data.get("category", ""))
+		if category != "Nahrung" and category != "Getraenk":
+			continue
+		if int(items.get(key, 0)) <= 0:
+			continue
+		if not result.has(key):
+			result.append(key)
+	return result
+
+
+func item_effect_preview(item_id: String) -> Dictionary:
+	var data := DataCatalog.item(item_id)
+	if data.is_empty():
+		return {}
+	return data.get("effects", {}).duplicate(true)
+
+
 func use_item(item_id: String) -> String:
 	var data := DataCatalog.item(item_id)
 	if data.is_empty() or not remove_item(item_id, 1):
@@ -824,6 +1033,14 @@ func _clothing_weight_bonus(slot_to_ignore: String) -> float:
 			continue
 		total += float(DataCatalog.item(item_id).get("carry_weight_bonus", 0.0))
 	return total
+
+
+func _two_hand_conflict_slots(primary_slot: String) -> Array[String]:
+	var slots: Array[String] = ["shield"]
+	for weapon_slot in WEAPON_EQUIP_SLOTS:
+		if weapon_slot != primary_slot:
+			slots.append(weapon_slot)
+	return slots
 
 
 func _is_stat_bonus_key(key: String) -> bool:

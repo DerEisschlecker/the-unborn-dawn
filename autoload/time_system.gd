@@ -1,5 +1,5 @@
 # Purpose: Controls the fixed 260-day campaign clock and 24 hourly rounds per day.
-# Public API: reset_time(), advance(), advance_to_morning(), serialize(), restore().
+# Public API: reset_time(), advance(), advance_rest(), advance_to_morning(), serialize(), restore().
 # Dependencies: EventBus, GameState, WaveManager, SaveSystem.
 extends Node
 
@@ -66,28 +66,17 @@ func enemy_strength_multiplier() -> float:
 	return 1.0
 
 
-func advance(segments: int = 1, reason: String = "") -> void:
+func advance(segments: int = 1, reason: String = "", spend_action_costs: bool = true) -> void:
 	for _step in range(maxi(1, segments)):
-		GameState.spend_for_action(4.0, 3.0)
-		phase_index += 1
-		if phase_index >= HOURS_PER_DAY:
-			phase_index = 0
-			if current_day < GameState.MAX_DAY:
-				current_day += 1
-			_apply_daily_changes()
-			if current_day >= GameState.MAX_DAY - 10 and current_day < GameState.MAX_DAY:
-				EventBus.post_message("Nur noch %d Tage bis zur laengsten Nacht." % (GameState.MAX_DAY - current_day))
-			if current_day >= GameState.MAX_DAY:
-				EventBus.post_message("Tag 260. Heute Nacht entscheidet alles.")
-			if GameState.game_active:
-				SaveSystem.save_game(1, true)
-			_check_story_day()
-		if phase_index == WAVE_WARNING_HOUR and WaveManager.is_wave_day(current_day):
-			WaveManager.prepare_wave(current_day)
-			EventBus.wave_due.emit(current_day)
-		EventBus.time_changed.emit(current_day, current_phase())
+		if spend_action_costs:
+			GameState.spend_for_action(4.0, 3.0)
+		_advance_one_hour()
 	if not reason.is_empty():
 		EventBus.post_message(reason)
+
+
+func advance_rest(hours: int, reason: String = "") -> void:
+	advance(hours, reason, false)
 
 
 func advance_to_morning() -> void:
@@ -132,6 +121,26 @@ func _check_story_day() -> void:
 	elif current_day >= 180 and not GameState.story_flags.get("act_3", false):
 		GameState.story_flags.act_3 = true
 		EventBus.story_due.emit("act_3")
+
+
+func _advance_one_hour() -> void:
+	phase_index += 1
+	if phase_index >= HOURS_PER_DAY:
+		phase_index = 0
+		if current_day < GameState.MAX_DAY:
+			current_day += 1
+		_apply_daily_changes()
+		if current_day >= GameState.MAX_DAY - 10 and current_day < GameState.MAX_DAY:
+			EventBus.post_message("Nur noch %d Tage bis zur laengsten Nacht." % (GameState.MAX_DAY - current_day))
+		if current_day >= GameState.MAX_DAY:
+			EventBus.post_message("Tag 260. Heute Nacht entscheidet alles.")
+		if GameState.game_active:
+			SaveSystem.save_autosave()
+		_check_story_day()
+	if phase_index == WAVE_WARNING_HOUR and WaveManager.is_wave_day(current_day):
+		WaveManager.prepare_wave(current_day)
+		EventBus.wave_due.emit(current_day)
+	EventBus.time_changed.emit(current_day, current_phase())
 
 
 func serialize() -> Dictionary:

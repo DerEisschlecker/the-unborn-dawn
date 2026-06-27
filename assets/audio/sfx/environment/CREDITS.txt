@@ -1,0 +1,5 @@
+Main menu atmosphere:
+- rain_loop.wav from "Rain on Window Loop" by alxl (CC0)
+  https://opengameart.org/content/rain-on-window-loop
+- distant_scream.wav from "Phantom Scream" (CC0)
+  https://opengameart.org/content/phantom-scream

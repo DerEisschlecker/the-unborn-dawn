@@ -17,7 +17,7 @@ var wave_art: TextureRect
 
 
 func _ready() -> void:
-	AudioManager.play_music("res://assets/audio/music/combat/hold_the_line.wav", -6.0)
+	AudioManager.play_scene_music("defense_wave")
 	AudioManager.play_sfx("res://assets/audio/sfx/environment/wave_warning.wav", -3.0)
 	if not WaveManager.pending_wave:
 		WaveManager.prepare_wave(TimeSystem.current_day)
@@ -62,6 +62,7 @@ func _ready() -> void:
 
 
 func _side_panel(title: String, color: String, text: String, texture_path: String, role: String = "") -> PanelContainer:
+	var viewport := UiFactory.viewport_size(self)
 	var panel := PanelContainer.new()
 	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	panel.add_theme_stylebox_override("panel", UiFactory._panel_style())
@@ -70,7 +71,8 @@ func _side_panel(title: String, color: String, text: String, texture_path: Strin
 	box.add_child(UiFactory.title_label(title, 26))
 	var field := ColorRect.new()
 	field.color = Color(color)
-	field.custom_minimum_size = Vector2(700, 360)
+	field.custom_minimum_size = Vector2(viewport.x * 0.28, viewport.y * 0.34)
+	field.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	box.add_child(field)
 	var art := TextureRect.new()
 	art.texture = load(texture_path)

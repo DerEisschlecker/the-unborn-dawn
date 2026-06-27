@@ -1,0 +1,53 @@
+[gd_resource type="Resource" script_class="CatalogData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/catalog_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+entries = {
+"harbor_pier": {"title": "Schwarzpier", "intro": "Rostige Ketten knarren im Wind. Unter dem Pier glitzert noch brauchbares Material.", "choices": [
+	{"label": "Kette sichern und Route markieren", "cost": {"wood": 1}, "flags": {"harbor_route_mapped": true}, "message": "Du sicherst die Route. Der Kai ist als sicherer Durchgang markiert."},
+	{"label": "Nur Wasserflaschen bergen", "reward": {"items": {"clean_water": 2, "rainwater": 1}}, "message": "Zwischen den Planken findest du noch sauberes Wasser."},
+	{"label": "Schnell weiter", "stress": 2.0, "message": "Du gehst weiter, ohne den Pier zu erkunden."}
+]},
+"withered_gate": {"title": "Welkes Tor", "intro": "Das Tor blockiert den suedlichen Zugang. Mit Werkzeug liesse sich etwas freilegen.", "choices": [
+	{"label": "Scharniere loesen", "cost": {"metal": 1, "nails": 1}, "flags": {"bridge_scouted": true}, "message": "Du markierst tragende Stellen fuer eine spaetere Reparatur."},
+	{"label": "Durch die Luecke schluepfen", "reward": {"items": {"bandage": 1}}, "damage": 4.0, "message": "Du verletzt dich leicht, findest aber Verbandsmaterial."},
+	{"label": "Umgehen", "message": "Du notierst den Ort und gehst einen anderen Weg."}
+]},
+"grave_crossroads": {"title": "Graskreuzung", "intro": "Zettel, Strichmarken und eine schwache Funkfrequenz treffen sich hier.", "choices": [
+	{"label": "Funknotiz entschluesseln", "flags": {"discovered_radio": true}, "reward": {"money": 6}, "message": "Die Notiz verweist auf den Funkturm Nord. Du findest auch ein paar Dawn-Credits."},
+	{"label": "Grab nach Vorräten durchsuchen", "reward": {"items": {"energy_bar": 1, "cloth": 2}}, "stress": 3.0, "message": "Du findest Proviant, aber die Stille drueckt auf dich."},
+	{"label": "Nur markieren", "flags": {"discovered_radio": true}, "message": "Du markierst die Frequenz auf der Karte."}
+]},
+"silent_monastery": {"title": "Stilles Kloster", "intro": "Leere Kirchenbaenke und eingekerbtete Wegzeichen im Kreuzgang.", "choices": [
+	{"label": "Inschrift lesen", "flags": {"discovered_chapel": true}, "message": "Die Mauerinschrift weist zur versunkenen Kapelle."},
+	{"label": "Salz und Kraeuter sammeln", "reward": {"items": {"cleansing_salt": 1, "herbs": 2}}, "message": "Du sicherst heilige Restbestaende."},
+	{"label": "In der Sakristei ruhen", "reward": {"stats": {"energy": 12.0, "stamina": 10.0}}, "message": "Eine kurze Pause staerkt dich."}
+]},
+"collapsed_bridge": {"title": "Eingestuerzte Bruecke", "intro": "Der alte Uebergang ist weg. Mit Material koennte hier ein neuer Pfad entstehen.", "choices": [
+	{"label": "Stuetzen vermessen", "flags": {"bridge_scouted": true}, "message": "Du markierst tragende Stellen fuer eine Reparatur."},
+	{"label": "Truemmer nach Metall absuchen", "reward": {"items": {"metal": 2, "nails": 1}}, "cost": {"stamina": 8.0}, "message": "Muhsam, aber der Schrott lohnt sich."},
+	{"label": "Riskanter Sprung", "reward": {"items": {"fuel": 1}}, "damage": 6.0, "message": "Du rutschst ab, findest aber ein Benzinkanister-Rest."}
+]},
+"signal_observatory": {"title": "Observatorium", "intro": "Die Antennen drehen sich noch langsam. Nachts hoert man Antworten im Rauschen.", "choices": [
+	{"label": "Signale triangulieren", "flags": {"discovered_chapel": true, "bunker_code": true}, "message": "Zwei Orte werden markiert: Kapelle und Bunker."},
+	{"label": "Batterien bergen", "reward": {"items": {"flashlight_battery": 2, "electronics": 1}}, "message": "Du sicherst brauchbare Technik."},
+	{"label": "Nur lauschen", "reward": {"money": 4}, "message": "Ein Handelsruf im Rauschen bringt dir einen Tipp und ein paar Credits."}
+]},
+"eastern_pass": {"title": "Ostpass", "intro": "Eine schmale Strasse durch tote Vororte. Nur Vorsicht bringt dich heil zurueck.", "choices": [
+	{"label": "Route markieren", "flags": {"east_route_mapped": true}, "message": "Du markierst den Ostpass. Der Rueckweg ist lesbar."},
+	{"label": "Versteckte Kiste oeffnen", "reward": {"items": {"dried_meat": 2, "rifle_ammo": 3}}, "danger_roll": 0.35, "damage": 10.0, "message": "Die Kiste ist voll - aber etwas beobachtet dich.", "fail_message": "Eine Klaue trifft dich, bevor du fliehst."},
+	{"label": "Leise umkehren", "stress": 4.0, "message": "Du gehst zurueck, ohne den Pass zu betreten."}
+]},
+"south_roadblock": {"title": "Suedblockade", "intro": "Ein umgekippter Konvoi versperrt die Strasse. Ein Schluesselkasten glaenzt noch.", "choices": [
+	{"label": "Kasten aufbrechen", "flags": {"watchtower_key": true}, "reward": {"items": {"revolver_ammo": 4}}, "message": "Im Kontrollkasten liegt ein Wachtturmschluessel."},
+	{"label": "Kraftstoff absaugen", "reward": {"items": {"fuel": 2}}, "cost": {"stamina": 10.0}, "message": "Du sicherst Treibstoff aus einem Leck im Tank."},
+	{"label": "Nur durchqueren", "message": "Du schiebst dich am Wrack vorbei."}
+]},
+"radio_tower": {"title": "Funkturm Nord", "intro": "Ein schwaches Notsignal wiederholt drei Woerter: Noch nicht geboren.", "choices": [
+	{"label": "Signal verfolgen", "flags": {"bunker_code": true}, "message": "Im Rauschen liegt ein Bunkercode. Ein tieferer Ort ist erreichbar."},
+	{"label": "Munitionskiste sichern", "reward": {"items": {"revolver_ammo": 6, "metal": 1}}, "message": "Alte Militaervorraete liegen noch trocken."},
+	{"label": "Frequenz aufzeichnen", "reward": {"money": 8}, "flags": {"discovered_radio": true}, "message": "Du verkaufst die Frequenz später als wertvolle Information."}
+]}
+}

@@ -6,6 +6,7 @@ extends Node
 const ITEM_PATHS: Array[String] = [
 	"res://data/items/weapons_melee.tres",
 	"res://data/items/weapons_ranged.tres",
+	"res://data/items/weapons_dd_sheet.tres",
 	"res://data/items/ammo.tres",
 	"res://data/items/food.tres",
 	"res://data/items/drinks.tres",
@@ -22,7 +23,10 @@ var enemies: Dictionary = {}
 var recipes: Dictionary = {}
 var structures: Dictionary = {}
 var base_rooms: Dictionary = {}
+var modular_pieces: Dictionary = {}
 var locations: Dictionary = {}
+var map_events: Dictionary = {}
+var travel_events: Dictionary = {}
 var waves: Dictionary = {}
 var player: Dictionary = {}
 var stories: Dictionary = {}
@@ -77,7 +81,10 @@ func reload_all() -> void:
 	recipes = _entries("res://data/crafting/recipes.tres")
 	structures = _entries("res://data/building/structures.tres")
 	base_rooms = _entries("res://data/building/base_rooms.tres")
+	modular_pieces = _entries("res://data/building/modular_kit_pieces.tres")
 	locations = _entries("res://data/world/locations.tres")
+	map_events = _entries("res://data/world/map_events.tres")
+	travel_events = _entries("res://data/world/travel_events.tres")
 	waves = _entries("res://data/waves/wave_schedule.tres")
 	player = _entries("res://data/player/player_stats_base.tres")
 	stories = _entries("res://data/story/story_slides.tres")
@@ -137,6 +144,10 @@ func structure(structure_id: String) -> Dictionary:
 	return structures.get(structure_id, {})
 
 
+func modular_piece(piece_id: String) -> Dictionary:
+	return modular_pieces.get(piece_id, {})
+
+
 func base_room(room_id: String) -> Dictionary:
 	return base_rooms.get(room_id, {})
 
@@ -159,6 +170,21 @@ func surface_slots() -> Array[String]:
 
 func location(location_id: String) -> Dictionary:
 	return locations.get(location_id, {})
+
+
+func map_event(event_id: String) -> Dictionary:
+	return map_events.get(event_id, {})
+
+
+func travel_event(event_id: String) -> Dictionary:
+	return travel_events.get(event_id, {})
+
+
+func random_travel_event() -> Dictionary:
+	if travel_events.is_empty():
+		return {}
+	var ids: Array = travel_events.keys()
+	return travel_events[str(ids[randi() % ids.size()])].duplicate(true)
 
 
 func wave_config() -> Dictionary:

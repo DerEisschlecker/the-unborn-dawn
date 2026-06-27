@@ -27,6 +27,9 @@ ItemTooltip="*res://autoload/item_tooltip.gd"
 TimeSystem="*res://autoload/time_system.gd"
 WaveManager="*res://autoload/wave_manager.gd"
 SaveSystem="*res://autoload/save_system.gd"
+ItemDragDrop="*res://autoload/item_drag_drop.gd"
+HudStatPreview="*res://autoload/hud_stat_preview.gd"
+DisplayManager="*res://autoload/display_manager.gd"
 _mcp_game_helper="*res://addons/godot_ai/runtime/game_helper.gd"
 
 [display]
@@ -39,6 +42,28 @@ window/stretch/aspect="expand"
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/godot_ai/plugin.cfg")
+
+[gui]
+
+theme/custom="res://ui/themes/dark_theme.tres"
+
+[importer_defaults]
+
+texture={
+"compress/channel_pack": 0,
+"compress/hdr_compression": 1,
+"compress/high_quality": false,
+"compress/lossy_quality": 0.7,
+"compress/mode": 2,
+"compress/normal_map": 0,
+"detect_3d/compress_to": 1,
+"mipmaps/generate": false,
+"process/fix_alpha_border": true,
+"process/hdr_as_srgb": false,
+"process/premult_alpha": false,
+"process/size_limit": 0,
+"roughness/mode": 0
+}
 
 [physics]
 

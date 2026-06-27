@@ -37,5 +37,8 @@ entries = {
 "reinforced_belt": {"name": "Trageguertel verstaerken", "inputs": {"leather_belt": 1, "metal": 2, "nails": 2}, "output": "reinforced_belt", "amount": 1, "level": 1},
 "salt_amulet": {"name": "Salzamulett binden", "inputs": {"cleansing_salt": 1, "herbs": 1, "cloth": 1}, "output": "salt_amulet", "amount": 1, "level": 0},
 "wire_ring": {"name": "Drahtring formen", "inputs": {"metal": 1, "nails": 1}, "output": "wire_ring", "amount": 1, "level": 0},
-"work_gloves": {"name": "Arbeitshandschuhe naehen", "inputs": {"cloth": 2}, "output": "work_gloves", "amount": 1, "level": 0}
+"work_gloves": {"name": "Arbeitshandschuhe naehen", "inputs": {"cloth": 2}, "output": "work_gloves", "amount": 1, "level": 0},
+"scrap_greatsword": {"name": "Zweihandschwert schmieden", "inputs": {"metal": 6, "wood": 2, "nails": 2}, "output": "scrap_greatsword", "amount": 1, "level": 2},
+"war_axe": {"name": "Kriegsaxt schmieden", "inputs": {"metal": 7, "wood": 3, "nails": 3}, "output": "war_axe", "amount": 1, "level": 2},
+"heavy_crossbow": {"name": "Schwere Armbrust bauen", "inputs": {"metal": 4, "wood": 4, "electronics": 1, "nails": 2}, "output": "heavy_crossbow", "amount": 1, "level": 2}
 }

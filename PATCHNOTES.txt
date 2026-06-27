@@ -1,0 +1,481 @@
+================================================================================
+LAST LIGHT — PROJEKT-AENDERUNGSPROTOKOLL (PATCHNOTES)
+================================================================================
+Godot 4.6 | Pfad: PATCHNOTES.txt (Projektroot)
+
+Regeln:
+  - Neueste Eintraege stehen IMMER ganz oben (direkt unter diesem Kopf).
+  - Jede Aenderungssession bekommt einen eigenen Block mit Datum (YYYY-MM-DD).
+  - Kurz, strukturiert: Was | Warum | Betroffene Dateien (wenn sinnvoll).
+  - Der Cursor-Agent aktualisiert diese Datei bei jeder Projektänderung automatisch.
+
+================================================================================
+AENDERUNGEN (neueste zuerst)
+================================================================================
+
+--------------------------------------------------------------------------------
+2026-06-25 | Fix — Kampf Parse-Fehler + Kampf-Simulation
+--------------------------------------------------------------------------------
+[FIX] combat_scene.gd: portrait_size Typfehler (Kampf-Szene lud nicht).
+[FIX] TurnLogic-Modul fuer Initiative, Zugreihenfolge und deterministische Kampf-Simulation.
+[TEST] Solo- und Team-Kaempfe simuliert; toter Begleiter wird aus der Reihenfolge uebersprungen.
+
+Betroffene Dateien:
+  scripts/combat/combat_scene.gd, scripts/combat/combat_turn_logic.gd, tests/test_player_systems.gd
+
+--------------------------------------------------------------------------------
+2026-06-21 | Fix — Kampf-Begleiter, Save-Validierung, Dev-Bake
+--------------------------------------------------------------------------------
+[FIX] Begleiter: eigene Stats ohne Spieler-Ausruestung; Deckung/Heilung/Schild pro Akteur.
+[FIX] Kampf-UI zeigt beim Gegnerzug weiterhin Spieler-Werte statt falsche Begleiter-Leiste.
+[FIX] Gegner-Schaden: Spieler-Ruestung gilt nicht mehr fuer den Begleiter.
+[FIX] Save-Restore validiert Begleiter-Daten nach dem Laden.
+[FIX] weapon_tileset_bake.gd: Godot 4.6 add_custom_data_layer (void) API.
+
+Betroffene Dateien:
+  scripts/combat/combat_scene.gd, autoload/game_state.gd, tests/test_player_systems.gd
+
+--------------------------------------------------------------------------------
+2026-06-21 | Kampf-UI — Rundenleiste, Horror-Musik, Begleiter-Tooltips
+--------------------------------------------------------------------------------
+[UI] Oben mittig: RUNDE X plus Portraitleiste in Initiativ-Reihenfolge; aktiver Kaempfer hervorgehoben.
+[AUDIO] Kampfszenen nutzen Horror-Ambience statt Kampf-Track.
+[FIX] Begleiter: Faehigkeiten-Hover, Tooltips und Schadensvorschau wie beim Spieler.
+
+Betroffene Dateien:
+  scripts/combat/combat_scene.gd, autoload/audio_manager.gd, autoload/game_state.gd
+
+--------------------------------------------------------------------------------
+2026-06-21 | Admin — Godmode + Hauptmenue-Stil
+--------------------------------------------------------------------------------
+[NEU] Admin-Menue: Godmode-Checkbox fuer freie Kartenreise ohne Kosten/Sperren.
+[UI] Admin-Menue im Hauptmenue-Stil (menu_ruins, menu_panel_style, ohne Textrahmen).
+
+Betroffene Dateien:
+  scripts/ui/admin_item_screen.gd, autoload/game_state.gd
+  scripts/world_map/world_map.gd, scripts/ui/ui_factory.gd
+
+--------------------------------------------------------------------------------
+2026-06-21 | Kampf-Team — Initiative, Begleiter, Zufalls-Maps
+--------------------------------------------------------------------------------
+[NEU] Initiative-Stat fuer Spieler und Gegner; Level-Up-Punkt Initiative.
+[NEU] Kampfreihenfolge nach Initiative-Wurf zu Kampfbeginn.
+[NEU] Rostige Taverne (Welkes Tor): Begleiter aus Starter-Klassen anheuern.
+[NEU] Begleiter kaempft spielbar mit eigenen Klassenfaehigkeiten.
+[NEU] Erkundungskarten pro Besuch zufaellig generiert.
+[NEU] Gegnertyp und Staerke skalieren mit Spieler-Level und Gefahr.
+
+Betroffene Dateien:
+  scripts/world/exploration_layout_generator.gd, enemy_spawn_service.gd
+  scripts/ui/tavern_screen.gd, scenes/ui/tavern_screen.tscn
+  autoload/game_state.gd, rpg_rules.gd, combat_scene.gd, exploration_scene.gd
+  world_map.gd, locations.tres, enemy_stats.tres, level_screen.gd
+
+--------------------------------------------------------------------------------
+2026-06-21 | Fix — TileSet-Bake + Waffen-Sheet Import
+--------------------------------------------------------------------------------
+[FIX] weapon_tileset_bake.gd: Godot 4.6 API (add_custom_data_layer gibt void zurueck).
+[FIX] Waffen-Sheet-Import valid=true; TileMap-Editor malt Katalog nur nach Bake.
+[TEST] TileSet-Ressource und Bake-Skript muessen laden.
+
+Betroffene Dateien:
+  scripts/dev/weapon_tileset_bake.gd, scripts/dev/weapon_tilemap_editor.gd
+  assets/tilesets/source/darkest_dungeon_weapons_sheet.png.import
+  tests/test_player_systems.gd
+
+--------------------------------------------------------------------------------
+2026-06-21 | Admin-Menue — Layout + neue Waffen
+--------------------------------------------------------------------------------
+[FIX] Admin-Lager: Zwei-Spalten-Layout (Rucksack links, Katalog rechts), gruppierte Tabs.
+[FIX] Seitenweise Navigation (< / >) statt dutzender Tab-Leisten.
+[FIX] DataCatalog.reload_all() beim Oeffnen — neue dd_*-Waffen sichtbar.
+[UI]  Waffen-Karten zeigen Schaden; Suche und Drag&Drop bleiben erhalten.
+
+Betroffene Dateien:
+  scripts/ui/admin_item_screen.gd, tests/test_player_systems.gd
+
+--------------------------------------------------------------------------------
+2026-06-21 | Waffen — DD-Sheet Icons + neue Waffen-Items
+--------------------------------------------------------------------------------
+[NEU] assets/tilesets/source/darkest_dungeon_weapons_sheet.png + 28 PNG-Icons (128px).
+[NEU] data/items/weapons_dd_sheet.tres: 15 neue Waffen (Nahkampf, Fernkampf, Wurf).
+[NEU] scripts/dev/weapon_sheet_definitions.gd + weapon_sheet_slicer.gd (Slice/Bake-Pipeline).
+[UPDATE] Bestehende Waffen nutzen Sheet-Icons statt SVG (ausser Brecheisen).
+[UPDATE] weapon_tileset_bake.gd: 29 Waffen-Tiles fuer TileMap-Editor.
+
+Betroffene Dateien:
+  assets/items/weapons/melee/*.png, assets/items/weapons/ranged/*.png
+  data/items/weapons_dd_sheet.tres, data/items/weapons_melee.tres, weapons_ranged.tres
+  autoload/data_catalog.gd, scripts/dev/weapon_*.gd, tools/slice_weapon_sheet.ps1
+  tests/test_player_systems.gd
+
+--------------------------------------------------------------------------------
+2026-06-21 | Dev — Waffen-TileMap Editor (TileSet-Workflow)
+--------------------------------------------------------------------------------
+[NEU] scenes/dev/weapon_tilemap_editor.tscn: TileMapLayer-Katalog + Layout zum Malen/Auswaehlen.
+[NEU] scripts/dev/weapon_tileset_bake.gd: baut weapons_atlas.png + weapon_tileset.tres (Bake Now).
+[NEU] Custom Data pro Tile: item_id, display_name, description (Select-Tab im TileSet-Panel).
+
+Betroffene Dateien:
+  scenes/dev/weapon_tilemap_editor.tscn, scripts/dev/weapon_tileset_bake.gd
+  scripts/dev/weapon_tilemap_editor.gd, scripts/dev/weapon_tilemap_catalog.gd
+  scripts/dev/run_weapon_tileset_bake.gd, tests/test_player_systems.gd
+
+--------------------------------------------------------------------------------
+2026-06-21 | Kampf — Heilung zaehlen und Debuff-Tooltips
+--------------------------------------------------------------------------------
+[FIX] Jede tatsaechliche Lebensheilung (Bandage, Medizin, Faehigkeiten) erhoeht „Heilung“ in der Uebersicht.
+[UI]  Debuffs als Chips mit Tooltip (Wirkung bei Mauszeiger).
+[UI]  Heil-Ereignisse zusaetzlich gruen im Verlauf (+X Leben geheilt).
+
+Betroffene Dateien:
+  scripts/combat/combat_scene.gd, tests/test_player_systems.gd
+
+--------------------------------------------------------------------------------
+2026-06-21 | Kampf — Kampfuebersicht im eigenen Rahmen
+--------------------------------------------------------------------------------
+[UI]  KAMPFUEBERSICHT und VERLAUF jeweils in separatem Ornament-Rahmen unter KAMPFLOG.
+
+Betroffene Dateien:
+  scripts/combat/combat_scene.gd, tests/test_player_systems.gd
+
+--------------------------------------------------------------------------------
+2026-06-21 | Kampf — Kampflog repariert und vergroessert
+--------------------------------------------------------------------------------
+[FIX] Kampflog: RichTextLabel direkt im ScrollContainer, fit_content — Anzeige sichtbar.
+[UI]  KAMPFUEBERSICHT zeigt Gesamtwerte (auch 0) fuer den ganzen Kampf.
+[UI]  VERLAUF: farbiger Ereignis-Feed (Schaden rot, Heilung gruen, Buffs blau, Debuffs lila).
+[UI]  Schrift groesser (16–18 px) mit mehr Zeilenabstand.
+
+Betroffene Dateien:
+  scripts/combat/combat_scene.gd, tests/test_player_systems.gd
+
+--------------------------------------------------------------------------------
+2026-06-21 | Kampf — kompaktes Menue und Kampfuebersicht
+--------------------------------------------------------------------------------
+[UI]  WERTE-Stats und AUSRUESTUNG-Grid im Kampfmenue entfernt; Rucksack-Deko-Icon weg.
+[UI]  Unteres Kampf-Panel schmaler (weniger Hoehe, kleinere Portraits, mehr Platz fuer Log).
+[UI]  KAMPFLOG: farbige Gesamtkampf-Zusammenfassung (Schaden, Heilung, Schild, Buffs, Debuffs).
+[UI]  Letzte Aktion weiterhin unter der Uebersicht; Schaden rot, Heilung gruen, Buffs blau, Debuffs lila.
+
+Betroffene Dateien:
+  scripts/combat/combat_scene.gd, tests/test_player_systems.gd
+
+--------------------------------------------------------------------------------
+2026-06-21 | HUD — Balken-Vorschau bei Aktionen
+--------------------------------------------------------------------------------
+[UI]  Kampf-Hover zeigt Gegner-Lebensbalken-Vorschau bei Angriff und Schadens-Faehigkeiten.
+[FIX] Balken-Vorschau sichtbar: Restwert hell, Verbrauch als verblasster Ueberhang.
+[UI]  Kampf: Angreifen, Deckung, Heilen, Flucht, Faehigkeiten und Heil-Items mit Vorschau.
+[UI]  Weltkarte: Reise-Hover aktualisiert HUD-Balken (Ausdauer, Energie, Hunger, Durst).
+[UI]  Rasten-Button zeigt volle Ausdauer/Energie als Vorschau.
+[TEST] 31/31 Tests bestanden.
+
+Betroffene Dateien:
+  autoload/hud_stat_preview.gd, autoload/event_bus.gd, scripts/ui/hud.gd, scripts/ui/ui_factory.gd
+  scripts/combat/combat_scene.gd, scripts/world_map/world_map.gd, project.godot
+
+--------------------------------------------------------------------------------
+2026-06-21 | HUD — Leiste volle Breite (9-Slice)
+--------------------------------------------------------------------------------
+[FIX] HUD-Rahmen als NinePatchRect: volle Bildschirmbreite ohne Abschneiden der Ecken.
+[UI]  Mittelteil der hud_top_bar.png streckt horizontal, ornamentale Enden bleiben fix.
+[FIX] flip_v entfernt — PNG mit Transparenz direkt fuer die untere Leiste.
+
+Betroffene Dateien:
+  scenes/ui/hud.tscn, scripts/ui/hud.gd, scripts/ui/ornate_ui_styles.gd, scripts/ui/ui_factory.gd
+
+--------------------------------------------------------------------------------
+2026-06-21 | HUD — Leiste als PNG mit Transparenz
+--------------------------------------------------------------------------------
+[FIX] Alle Pfade von hud_top_bar.jpg auf hud_top_bar.png aktualisiert (Szene + OrnateUiStyles).
+[UI]  Transparenter Rahmen statt schwarzer JPEG-Kanten an der HUD-Leiste.
+
+Betroffene Dateien:
+  assets/ui/frames/hud_top_bar.png, scenes/ui/hud.tscn, scripts/ui/ornate_ui_styles.gd
+
+--------------------------------------------------------------------------------
+2026-06-21 | HUD — Editor-Layout in Szenen
+--------------------------------------------------------------------------------
+[UI]  HUD komplett in hud.tscn: Icons, Balken und Buttons im Godot-Editor sichtbar und verschiebbar.
+[UI]  HUD-Instanz in allen Gameplay-Szenen eingebettet (Weltkarte, Kampf, Basis, …).
+[FIX] clear_dynamic_children() behaelt eingebettetes HUD beim Laufzeit-Aufbau.
+[TEST] 31/31 Tests bestanden.
+
+Betroffene Dateien:
+  scenes/ui/hud.tscn, scripts/ui/hud.gd, scripts/ui/gameplay_screen.gd
+  scenes/world_map/world_map.tscn, scenes/combat/combat_scene.tscn, scenes/base/base_scene.tscn
+  scenes/exploration/exploration_scene.tscn, scenes/ui/crafting_screen.tscn, scenes/ui/level_screen.tscn
+  scenes/ui/trader_screen.tscn, scenes/ui/admin_item_screen.tscn, scenes/base/build_menu.tscn
+  scenes/base/defense_wave.tscn, scenes/characters/elena.tscn
+
+--------------------------------------------------------------------------------
+2026-06-21 | HUD — Einheitliche Icon-Groesse
+--------------------------------------------------------------------------------
+[UI]  Alle HUD-Icons nutzen dieselbe Groesse (68/76 px): Status, Uhr, Sonne, Aktionen.
+[UI]  Aktions-Icons als TextureButton ohne Rahmen-Padding — gleiche Flaeche wie Stats.
+[UI]  Leisten-Hoehe auf 128/142 px angepasst.
+[TEST] 31/31 Tests bestanden.
+
+Betroffene Dateien:
+  scripts/ui/hud.gd, scripts/ui/ui_factory.gd
+
+--------------------------------------------------------------------------------
+2026-06-21 | HUD — Aktions-Icons Faehigkeiten, Rasten, Rucksack
+--------------------------------------------------------------------------------
+[UI]  Rechts in der Leiste: Faehigkeiten (K), Rasten, Rucksack — alle per Linksklick.
+[UI]  Neue Icons abilities.png, rest.png, backpack.png; Status-Icons groesser (52-58 px).
+[UI]  Leisten-Hoehe 108/118 px; GameplayScreen.rest_action() fuer Rasten.
+[TEST] 31/31 Tests bestanden.
+
+Betroffene Dateien:
+  assets/ui/icons/abilities.png, rest.png, backpack.png
+  scripts/ui/hud.gd, scripts/ui/ui_factory.gd, scripts/ui/gameplay_screen.gd
+  scripts/world_map/world_map.gd, tests/test_player_systems.gd
+
+--------------------------------------------------------------------------------
+2026-06-21 | HUD — Leiste ohne schwarzen Rand, Uhr, Tag/Nacht-Sonne
+--------------------------------------------------------------------------------
+[FIX] Schwarzer Rand entfernt: Leiste als flip_v-TextureRect statt 9-Slice-Stretch.
+[UI]  Hoehe auf 94/104 px reduziert — nur noch die Leisten-Grafik sichtbar.
+[UI]  Groessere Status-Icons (44-50 px); analoge Uhr wieder links.
+[UI]  Sonne nur Tag/Nacht-Indikator (hell/gedimmt), kein XP-Balken mehr.
+[TEST] 31/31 Tests bestanden.
+
+Betroffene Dateien:
+  scripts/ui/hud.gd, scripts/ui/ui_factory.gd, tests/test_player_systems.gd
+
+--------------------------------------------------------------------------------
+2026-06-21 | HUD — Neue Status-Icons und farbige Balken
+--------------------------------------------------------------------------------
+[UI]  PNG-Icons: Leben, Hunger, Tag/Sonne, Ausdauer, Durst, Energie, Schild.
+[UI]  RPG-Layout: Icon ueber Balken; Tag-Sonne mit XP-Leiste (gold).
+[UI]  Balkenfarben: Leben rot, Durst hellblau, Energie/Ausdauer gruen, Schild blau, Hunger braun.
+[UI]  UiFactory.stat_bar_color() und apply_stat_bar() zentral.
+[TEST] 31/31 Tests bestanden.
+
+Betroffene Dateien:
+  assets/ui/icons/*.png, scripts/ui/hud.gd, scripts/ui/ui_factory.gd
+  scripts/world_map/world_map.gd, scripts/combat/combat_scene.gd, autoload/game_state.gd
+
+--------------------------------------------------------------------------------
+2026-06-21 | HUD — Leiste unten, groessere Icons
+--------------------------------------------------------------------------------
+[UI]  Status-Leiste am unteren Bildschirmrand (PRESET_BOTTOM_WIDE).
+[UI]  Feste Hoehe 118/132 px; UiFactory.hud_bottom_inset() fuer Szenen-Abstand.
+[UI]  Groessere Icons (28-32 px), Uhr (56-64 px) und breitere Statusbalken.
+[FIX] Kampf, Basis und Weltkarte: Inhalt endet oberhalb der Leiste.
+[TEST] 31/31 Tests bestanden.
+
+Betroffene Dateien:
+  scripts/ui/hud.gd, scripts/ui/ui_factory.gd, scripts/ui/gameplay_screen.gd
+  scripts/combat/combat_scene.gd, scripts/base/base_scene.gd, scripts/world_map/world_map.gd
+
+--------------------------------------------------------------------------------
+2026-06-21 | HUD — Ornate-Leiste oben mit Uhr und Status-Icons
+--------------------------------------------------------------------------------
+[UI]  Neue Top-Leiste (hud_top_bar.jpg) als 9-Slice-Rahmen fuer das HUD.
+[UI]  Uhr, Status-Icons, Elena, Credits und Inventar sitzen in der Leiste.
+[UI]  UiFactory.hud_height() und GameplayScreen.attach_hud() zentral.
+[UI]  Kampf, Basis und Weltkarte nutzen dieselbe HUD-Leiste; Kampf bekam HUD.
+[TEST] 31/31 Tests bestanden.
+
+Betroffene Dateien:
+  assets/ui/frames/hud_top_bar.jpg, scripts/ui/hud.gd, scripts/ui/ornate_ui_styles.gd
+  scripts/ui/ui_factory.gd, scripts/ui/gameplay_screen.gd, scripts/combat/combat_scene.gd
+  scripts/base/base_scene.gd, scripts/world_map/world_map.gd
+
+--------------------------------------------------------------------------------
+2026-06-21 | Status-Icons — Leben, Ausdauer, Energie
+--------------------------------------------------------------------------------
+[UI]  Neue PNG-Icons: Herz (Leben), Lunge (Ausdauer), Blitz (Energie) 128x128.
+[UI]  UiFactory.stat_icon_path() zentral fuer HUD, Weltkarte, Kampf und Faehigkeiten.
+[ENTF] Alte SVG-Platzhalter health/stamina/energy entfernt.
+[TEST] 31/31 Tests bestanden.
+
+Betroffene Dateien:
+  assets/ui/icons/health.png, stamina.png, energy.png
+  scripts/ui/ui_factory.gd, scripts/ui/hud.gd, scripts/combat/combat_scene.gd
+  scripts/world_map/world_map.gd, autoload/game_state.gd
+
+--------------------------------------------------------------------------------
+2026-06-21 | Kampf — Aktionsleiste, Faehigkeiten-Icons, Heil-Submenue
+--------------------------------------------------------------------------------
+[UI]  Aktionsleiste: quadratische Icon-Slots (Angriff, Deckung, Heilen, Flucht) mit AP-Badge.
+[UI]  Faehigkeiten 1-9: RPG-Hotbar mit Klassen-Label, Icon, Tastennummer und CD-Overlay.
+[NEU] Heilen oeffnet Subleiste ueber der Aktionsleiste mit heilenden Inventar-Items.
+[NEU] combat_attack.svg, combat_flee.svg; InventorySystem.healing_combat_items().
+[TEST] 31/31 Tests bestanden.
+
+Betroffene Dateien:
+  scripts/combat/combat_scene.gd, scripts/ui/combat_ui_styles.gd, autoload/inventory_system.gd
+  assets/ui/icons/combat_attack.svg, assets/ui/icons/combat_flee.svg
+
+--------------------------------------------------------------------------------
+2026-06-21 | Kampf — Layout, Inventar-Icon, eigene Faehigkeiten-Rahmen
+--------------------------------------------------------------------------------
+[UI]  Vollbild-Layout: Arena groesser, Overlay ~31-33% Hoehe, Spalten per Stretch-Ratio.
+[FIX] Gegner und alle drei Panels sichtbar; keine festen Mindestbreiten mehr.
+[NEU] scripts/ui/combat_ui_styles.gd: kompakte Rahmen fuer Skills, Aktionen, Icons.
+[UI]  Faehigkeiten ohne Spike-Frame: Icon + Nummer, Name im Tooltip, CD-Lila-Rahmen.
+[UI]  Inventar-Button (Rucksack-Icon) im Rucksack-Panel, oeffnet Inventar per Klick/I.
+[UI]  Schriften, Slots und Aktionsbuttons fuer kompakte Darstellung skaliert.
+[TEST] 31/31 Tests bestanden.
+
+Betroffene Dateien:
+  scripts/ui/combat_ui_styles.gd, scripts/combat/combat_scene.gd, tests/test_player_systems.gd
+
+--------------------------------------------------------------------------------
+2026-06-21 | Kampf — Ornate-Overlay wie Hauptmenue
+--------------------------------------------------------------------------------
+[UI]  Kampf-UI in drei Spalten: SPIELER | RUCKSACK | KAMPFLOG (framed_column).
+[UI]  Spielerpanel: Werte, Ausruestung, Aktionen mit Section-Labels.
+[UI]  Rucksackpanel: Schnellzugriff + Faehigkeiten 1-9 getrennt beschriftet.
+[UI]  Kampflog: Ornate-Heading, scrollbarer Log, Hotkey-Hinweise.
+[UI]  Beute-Overlay und Runde-beenden-Dialog im Ornate-Stil.
+[TEST] 31/31 Tests bestanden.
+
+Betroffene Dateien:
+  scripts/combat/combat_scene.gd
+
+--------------------------------------------------------------------------------
+2026-06-21 | Hauptmenue — Weiterspielen laedt letzten Spielstand
+--------------------------------------------------------------------------------
+[FIX] WEITERSPIELEN nutzt jetzt SaveSystem.load_latest_save() statt nur Autosave.
+[NEU] latest_save_info(), any_save_exists(): neueste Datei aus Autosave + Slots 1-3.
+[UI]  Weiterspielen-Button aktiv wenn irgendein Speicher existiert; zeigt aktuellen Tag.
+[TEST] 31/31 Tests bestanden.
+
+Betroffene Dateien:
+  autoload/save_system.gd, scripts/main_menu/main_menu.gd, tests/test_player_systems.gd
+
+--------------------------------------------------------------------------------
+2026-06-21 | Crafting — Vollstaendiges Handwerk-Menue wiederhergestellt
+--------------------------------------------------------------------------------
+[FIX] crafting_screen.gd nach versehentlichem Git-Revert wiederhergestellt (4-Spalten-UI).
+[UI]  Rezept-Reiter (Alles, Waffen, Ausruestung, Medizin, Munition, Materialien, Sonstiges).
+[UI]  Rezeptzeilen mit OrnateUiStyles.list_button_style statt flacher StyleBoxFlat.
+[FIX] B-Taste: return_to_previous() per call_deferred; I/K/Escape via super._unhandled_input().
+[FIX] TAB_LABELS als Array[String] (kein Parse-Fehler mehr).
+[TEST] test_admin_menu_uses_f6_hotkey: UiFactory.line_edit statt LineEdit.new().
+[TEST] 31/31 Tests bestanden.
+
+Betroffene Dateien:
+  scripts/ui/crafting_screen.gd, tests/test_player_systems.gd
+
+--------------------------------------------------------------------------------
+2026-06-21 | UI — Ornate Spike-Rahmen fuer Buttons und Textfelder
+--------------------------------------------------------------------------------
+[NEU] assets/ui/frames/ornate_frame.png (228x54) als Nine-Patch-Rahmen.
+[NEU] scripts/ui/ornate_ui_styles.gd: zentrale StyleBoxTexture-Factory.
+[UI]  ui/themes/dark_theme.tres: Button, LineEdit, TextEdit, OptionButton mit Rahmen.
+[UI]  project.godot: globales gui/theme/custom gesetzt.
+[UI]  UiFactory.button/line_edit: Mindesthoehen an Rahmen angepasst.
+[UI]  main_menu, crafting_screen, admin_item_screen auf Ornate-Rahmen umgestellt.
+
+Betroffene Dateien:
+  assets/ui/frames/ornate_frame.png, scripts/ui/ornate_ui_styles.gd
+  ui/themes/dark_theme.tres, project.godot, scripts/ui/ui_factory.gd
+  scripts/main_menu/main_menu.gd, scripts/ui/crafting_screen.gd
+  scripts/ui/admin_item_screen.gd, tests/test_player_systems.gd
+
+--------------------------------------------------------------------------------
+2026-06-21 | Inventar — getrennte Fernkampf- und Nahkampf-Slots
+--------------------------------------------------------------------------------
+[UI]  Ausruestungsmenue zeigt dauerhaft zwei Waffen-Slots: Fernkampf (oben) + Nahkampf (unten).
+[NEU] Validierung: Fernkampf nur in firearm-Slot, Nahkampfwaffen nur in melee-Slot.
+[FIX] Klare Fehlermeldungen bei falschem Slot (Drag & Drop + Anlegen).
+[DATA] Slot-Label firearm umbenannt zu "Fernkampf" in inventory_system.gd.
+[TEST] test_weapon_slots_separate_ranged_and_melee
+
+Betroffene Dateien:
+  autoload/inventory_system.gd, autoload/item_drag_drop.gd
+  scripts/ui/inventory_screen.gd, tests/test_player_systems.gd
+
+--------------------------------------------------------------------------------
+2026-06-21 | Patchnotes-System + Inventar / Zweihandwaffen / Rucksack-Slot
+--------------------------------------------------------------------------------
+[NEU] PATCHNOTES.txt angelegt; Cursor-Regel fuer automatische Fortfuehrung.
+[NEU] Rucksack-Slot im Ausruestungsmenue (Inventar + Kampf): zeigt ausgeruesteten
+	  Rucksack; Drag & Drop zum Wechseln (backpack_slot).
+[NEU] Zweihandwaffen mit Flag two_handed:
+	  - Schrott-Zweihandschwert (melee), Kriegsaxt (melee), Schwere Armbrust (firearm)
+	  - Icons: assets/items/weapons/melee/greatsword.svg, war_axe.svg,
+		assets/items/weapons/ranged/heavy_crossbow.svg
+	  - Crafting-Rezepte (Werkbank Stufe 2) in data/crafting/recipes.tres
+[NEU] Zweihand-Logik in autoload/inventory_system.gd:
+	  - is_two_handed(), equipped_two_handed_weapon(), is_slot_blocked()
+	  - Schild + zweite Waffe blockiert; Schild-Slot im UI ausgegraut
+[UI]  scripts/ui/inventory_screen.gd: _backpack_equipment_slot, COLOR_SLOT_BLOCKED,
+	  Waffenspalte fuer Zweihand, blockierter Schild-Slot
+[UI]  scripts/combat/combat_scene.gd: Rucksack + Schild-Blockierung in Ausruestungsgrid
+[DATA] data/items/weapons_melee.tres, weapons_ranged.tres erweitert
+[TEST] tests/test_player_systems.gd: test_two_handed_weapons_block_shield_and_dual_wield
+	  (29/29 Tests bestanden)
+
+Betroffene Dateien (Auszug):
+  autoload/inventory_system.gd, autoload/item_drag_drop.gd, autoload/item_tooltip.gd
+  scripts/ui/inventory_screen.gd, scripts/ui/crafting_screen.gd
+  scripts/combat/combat_scene.gd
+  data/items/weapons_melee.tres, data/items/weapons_ranged.tres, data/crafting/recipes.tres
+  assets/items/weapons/melee/greatsword.svg, war_axe.svg
+  assets/items/weapons/ranged/heavy_crossbow.svg
+  tests/test_player_systems.gd
+  .cursor/rules/patchnotes.mdc
+
+--------------------------------------------------------------------------------
+2026-06-21 | Crafting / Hotkey B (Crash-Fix)
+--------------------------------------------------------------------------------
+[FIX] B-Taste crashte beim Oeffnen des Handwerks: Parse-Fehler in crafting_screen.gd
+	  (TAB_LABELS als ungueltige const mit PackedStringArray-Konstruktor).
+[FIX] TAB_LABELS auf const Array[String] umgestellt.
+[FIX] Szenenwechsel per B auf call_deferred (open_crafting / return_to_previous).
+[UI]  Crafting: super._unhandled_input fuer I/K/Escape; B = Zurueck.
+
+Betroffene Dateien:
+  scripts/ui/crafting_screen.gd, scripts/ui/gameplay_screen.gd
+
+--------------------------------------------------------------------------------
+2026-06-21 | Basis-Szene / Performance / Crafting-Tabs
+--------------------------------------------------------------------------------
+[FIX] Basis-Freeze: BaseFortress3D nicht mehr in base_fortress_view beim _ready;
+	  nur noch 2D-Cutaway + StructureOverlay (3D-Platzierungen).
+[FIX] Wellenschaden ueber GameState.apply_placement_wave_damage() statt vollem 3D-Rebuild.
+[PERF] base_structure_overlay: UPDATE_WHEN_VISIBLE; base_visual: Timer statt _process;
+	  world_map/level_screen/crafting: deferred Init.
+[UI]  Crafting: Rezept-/Inventar-Tabs (Alles, Waffen, Ausruestung, Medizin, Munition,
+	  Materialien, Sonstiges); Sortierung; parse/indent-Fixes.
+[TEST] test_all_scenes_instantiate (22 Szenen); 28+ Unit-Tests.
+
+Betroffene Dateien (Auszug):
+  scripts/base/base_fortress_view.gd, base_structure_overlay.gd, base_visual.gd
+  autoload/game_state.gd, scripts/ui/crafting_screen.gd
+  scripts/world_map/world_map.gd, scripts/ui/level_screen.gd
+  tests/test_player_systems.gd
+
+--------------------------------------------------------------------------------
+2026-06-21 | Audio / Main Menu / 3D-Basis (laufende Session)
+--------------------------------------------------------------------------------
+[NEU] Main-Menu-Musik und SFX (ashes_beyond_the_gate, horror_ambience, rain, coin, …).
+[NEU] 3D-Basis: base_fortress_3d, Kamera-Rig, Tueren, GLB-Modular-Kit, Structure-Overlay.
+[NEU] item_drag_drop.gd Autoload fuer geteiltes Inventar-Drag & Drop.
+[ENTF] equipment_screen (in Inventar integriert).
+[DATA] modular_kit_pieces.tres, map_events.tres, travel_events.tres.
+
+Betroffene Dateien (Auszug):
+  autoload/audio_manager.gd, autoload/item_drag_drop.gd
+  scripts/base/base_fortress_3d.gd, base_camera_rig.gd, destructible_door.gd
+  scenes/main_menu/main_menu.tscn, assets/audio/music/menu/*
+
+--------------------------------------------------------------------------------
+Vorher | Initial / Git-Historie (Kurzreferenz)
+--------------------------------------------------------------------------------
+- 8c7592a Initial commit: Last Light survival game (Godot 4.6)
+- a6d0649 GitHub Actions workflow + publish script
+
+(Hinweis: Detaillierte Aenderungen vor 2026-06-21 wurden nachtraeglich aus
+ Session-Kontext und Working-Tree zusammengefasst; ab jetzt laufend gepflegt.)
+
+================================================================================
+ENDE — Eintraege oberhalb von "AENDERUNGEN" nicht loeschen; neue Bloecke oben einfuegen
+================================================================================

@@ -3,6 +3,9 @@
 # Dependencies: DataCatalog, InventorySystem, GameState, TimeSystem.
 extends GameplayScreen
 
+const LootPopupScene := preload("res://scenes/exploration/loot_popup.tscn")
+const LayoutGenerator := preload("res://scripts/world/exploration_layout_generator.gd")
+const EnemySpawnService := preload("res://scripts/world/enemy_spawn_service.gd")
 const MAP_COLUMNS := 6
 const MAP_ROWS := 4
 const MOVE_POINTS_PER_ROUND := 6
@@ -27,19 +30,18 @@ var round_index := 1
 
 
 func _ready() -> void:
-	AudioManager.play_music(
-		"res://assets/audio/music/ambient_night/below_the_walls.wav" if TimeSystem.is_night()
-		else "res://assets/audio/music/ambient_day/fragile_morning.wav",
-		-12.0
-	)
+	AudioManager.play_scene_music("exploration", location_id)
 	location_id = GameState.current_location
 	if location_id.is_empty():
 		location_id = "ruined_town"
 	location = DataCatalog.location(location_id)
 	_configure_route()
+	var subtitle := "Klicke auf benachbarte Felder oder bewege dich mit WASD. Bewegung und Aktionen sind pro Runde begrenzt."
+	if str(location.get("type", "")) == "Dungeon":
+		subtitle = "Ein gefaehrlicher Ort. Erkunde vorsichtig — am Ende wartet ein starker Gegner."
 	var root := setup_gameplay(
 		str(location.get("name", "UNBEKANNTER ORT")).to_upper(),
-		"Klicke auf benachbarte Felder oder bewege dich mit WASD. Bewegung und Aktionen sind pro Runde begrenzt."
+		subtitle
 	)
 	var split := HSplitContainer.new()
 	split.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -50,11 +52,12 @@ func _ready() -> void:
 	var scene_box := VBoxContainer.new()
 	scene_box.add_theme_constant_override("separation", 10)
 	scene_panel.add_child(scene_box)
+	var viewport := UiFactory.viewport_size(self)
 	var artwork := TextureRect.new()
 	artwork.texture = load(str(location.get("background", "res://assets/environments/backgrounds/menu_ruins.png")))
 	artwork.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	artwork.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
-	artwork.custom_minimum_size = Vector2(900, 250)
+	artwork.custom_minimum_size = Vector2(viewport.x * 0.46, viewport.y * 0.22)
 	artwork.modulate = TimeSystem.scene_light_color()
 	scene_box.add_child(artwork)
 	round_label = UiFactory.body_label("", 20, UiFactory.COLOR_GOLD)
@@ -67,19 +70,21 @@ func _ready() -> void:
 	log_label = UiFactory.body_label("Du betrittst den Rand des Gebiets. Jeder Schritt zaehlt.", 19)
 	scene_box.add_child(log_label)
 	context_box = VBoxContainer.new()
-	context_box.custom_minimum_size.x = 480
+	context_box.custom_minimum_size.x = viewport.x * 0.25
 	context_box.add_theme_constant_override("separation", 10)
 	split.add_child(context_box)
 	_refresh()
 
 
 func _configure_route() -> void:
-	player_cell = START_CELL
+	var visit_seed := TimeSystem.current_day * 1009 + TimeSystem.current_hour() * 131 + location_id.hash()
+	var layout: Dictionary = LayoutGenerator.generate(location_id, int(location.get("danger", 1)), visit_seed)
+	player_cell = layout.get("start", START_CELL)
 	selected_cell = player_cell
-	hotspot_cells = [Vector2i(1, 1), Vector2i(3, 2), Vector2i(4, 0)]
-	combat_cell = Vector2i(5, 2)
-	recruit_cell = Vector2i(2, 3)
-	blocked_cells = [Vector2i(2, 1), Vector2i(4, 2)]
+	hotspot_cells.assign(layout.get("hotspots", []))
+	combat_cell = layout.get("combat", Vector2i(5, 2))
+	recruit_cell = layout.get("recruit", Vector2i(2, 3))
+	blocked_cells.assign(layout.get("blocked", []))
 	var danger := int(location.get("danger", 0))
 	if danger <= 0:
 		combat_cell = Vector2i(5, 1)
@@ -91,11 +96,13 @@ func _build_map() -> void:
 		for x in range(MAP_COLUMNS):
 			var cell := Vector2i(x, y)
 			var button := Button.new()
-			button.custom_minimum_size = Vector2(132, 76)
+			var cell_size := UiFactory.viewport_size(self)
+			button.custom_minimum_size = Vector2(cell_size.x * 0.07, cell_size.y * 0.07)
 			button.text = _cell_text(cell)
 			button.tooltip_text = _cell_tooltip(cell)
 			button.disabled = not _cell_clickable(cell)
 			button.pressed.connect(Callable(self, "_click_cell").bind(cell))
+			UiFactory.wire_button_sound(button)
 			map_grid.add_child(button)
 
 
@@ -148,17 +155,25 @@ func _search(index: int) -> void:
 		return
 	var item_id := str(loot.get("item_id", ""))
 	var amount := int(loot.get("amount", 1))
-	if InventorySystem.add_item(item_id, amount):
+	_open_loot_popup(item_id, amount, index)
+
+
+func _open_loot_popup(item_id: String, amount: int, search_index: int) -> void:
+	var popup: Control = LootPopupScene.instantiate()
+	add_child(popup)
+	popup.present_loot(item_id, amount)
+	popup.loot_taken.connect(func(_id: String, _amount: int) -> void:
 		AudioManager.play_sfx("res://assets/audio/sfx/ui/loot.wav", -4.0)
 		log_label.text = "Gefunden: %s x%d" % [DataCatalog.item(item_id).get("name", item_id), amount]
-		GameState.quest_flags["search_" + location_id] = index + 1
-		_reveal_clues(index)
+		GameState.quest_flags["search_" + location_id] = search_index + 1
+		_reveal_clues(search_index)
 		action_points = maxi(0, action_points - 1)
 		move_points = 0
 		GameState.spend_for_action(6.0, 4.0)
 		TimeSystem.advance(1)
 		if not WaveManager.pending_wave and GameState.pending_story.is_empty():
 			_refresh()
+	)
 
 
 func _reveal_clues(index: int) -> void:
@@ -199,7 +214,6 @@ func _move_to_cell(cell: Vector2i) -> void:
 		return
 	player_cell = cell
 	move_points = maxi(0, move_points - 1)
-	AudioManager.play_sfx("res://assets/audio/sfx/ui/click.wav", -8.0, 1.08)
 	log_label.text = _cell_tooltip(cell)
 	_refresh()
 
@@ -294,6 +308,15 @@ func _new_round() -> void:
 		_refresh()
 
 
+func _close_scene_popup() -> bool:
+	for index in range(get_child_count() - 1, -1, -1):
+		var child := get_child(index)
+		if child.has_method("close_with_escape"):
+			child.close_with_escape()
+			return true
+	return false
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
 		var direction := Vector2i.ZERO
@@ -314,12 +337,9 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _start_combat() -> void:
-	var danger := int(location.get("danger", 1))
-	var enemy_id := "demon_basic"
-	if danger >= 4:
-		enemy_id = "demon_brute"
-	elif danger >= 3 and TimeSystem.current_day % 2 == 0:
-		enemy_id = "demon_runner"
+	var player_level := int(GameState.player_stats.get("level", 1))
+	var seed_value := TimeSystem.current_day * 1009 + location_id.hash() + player_level * 17
+	var enemy_id := EnemySpawnService.pick_enemy(location, player_level, seed_value)
 	GameState.quest_flags.current_enemy = enemy_id
 	GameState.return_scene = scene_file_path
 	go_to("res://scenes/combat/combat_scene.tscn")

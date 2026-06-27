@@ -9,8 +9,9 @@ var game_active := false
 var player_gender := "female"
 var player_name := "Morgan"
 var player_class := "scout"
-var player_appearance := "wanderer"
+var player_appearance := "priest"
 var player_stats: Dictionary = {}
+var companion: Dictionary = {}
 var elena: Dictionary = {}
 var base_state: Dictionary = {}
 var survivors: Array[Dictionary] = []
@@ -23,11 +24,15 @@ var current_location := "base"
 var return_scene := "res://scenes/world_map/world_map.tscn"
 var pending_story := ""
 var story_return_scene := "res://scenes/world_map/world_map.tscn"
+var pending_map_event_id := ""
+var pending_map_travel_event := false
+var pending_map_event_data := {}
 var run_statistics: Dictionary = {}
 var learned_abilities: Array[String] = []
 var equipped_abilities: Array[String] = []
 var claimed_ability_levels: Array[int] = []
 var pending_ability_picks := 0
+var transient_loot: Dictionary = {}
 
 const SKILL_UPGRADES := {
 	"strength": {"name": "Staerke", "amount": 1.0},
@@ -46,13 +51,14 @@ const SKILL_UPGRADES := {
 	"crafting": {"name": "Handwerk", "amount": 1.0},
 	"critical_chance": {"name": "Krit-Chance", "amount": 1.0},
 	"armor_pierce": {"name": "Ruestungsdurchdringung", "amount": 1.0},
-	"control_resist": {"name": "Kontrollresistenz", "amount": 1.0}
+	"control_resist": {"name": "Kontrollresistenz", "amount": 1.0},
+	"initiative": {"name": "Initiative", "amount": 1.0}
 }
 
 const APPEARANCE_OPTIONS := {
-	"wanderer": {"name": "Streuner", "description": "Abgenutzte Reisekleidung und leichter Mantel."},
+	"priest": {"name": "Priest", "description": "Geweihtes Kriegskreuz und finstere Liturgie in der Nacht."},
 	"mechanic": {"name": "Schrauber", "description": "Werkstattkleidung, Gurte und improvisierte Taschen."},
-	"medic": {"name": "Sanitaeter", "description": "Helle Jacke mit sichtbarer medizinischer Markierung."},
+	"mara_hollow": {"name": "Dr. Mara Hollow", "description": "Blutverschmierte Feldklinikerin mit roten Kreuzen und Notfallausruestung."},
 	"guardian": {"name": "Waechter", "description": "Schwere Schutzkleidung und verstaerkte Weste."}
 }
 
@@ -64,19 +70,25 @@ const SURVIVOR_ROLE_NAMES := {
 	"sammler": "Sammler",
 	"arzt": "Arzt"
 }
+const COMPANION_PRESETS := {
+	"scout": {"name": "Riley", "gender": "female", "appearance": "priest"},
+	"medic": {"name": "Sam", "gender": "male", "appearance": "mechanic"},
+	"guardian": {"name": "Brooke", "gender": "female", "appearance": "guardian"},
+	"tinker": {"name": "Alex", "gender": "male", "appearance": "mechanic"}
+}
 const CLASS_ABILITIES := {
 	"scout": [
-		{"id": "scout_shadow_step", "name": "Schattenlauf", "description": "Schneller Schnitt und halber naechster Gegenschlag.", "effect": "damage_defend", "power": 10.0, "scale_stat": "melee", "scale": 2.0, "stamina_cost": 8.0, "energy_cost": 3.0, "defense_multiplier": 0.50, "icon": "res://assets/ui/icons/stamina.svg", "sound": "res://assets/audio/sfx/weapons/melee_hit.wav", "color": "#f0d17a"},
+		{"id": "scout_shadow_step", "name": "Schattenlauf", "description": "Schneller Schnitt und halber naechster Gegenschlag.", "effect": "damage_defend", "power": 10.0, "scale_stat": "melee", "scale": 2.0, "stamina_cost": 8.0, "energy_cost": 3.0, "defense_multiplier": 0.50, "icon": "res://assets/ui/icons/stamina.png", "sound": "res://assets/audio/sfx/weapons/melee_hit.wav", "color": "#f0d17a"},
 		{"id": "scout_knife_work", "name": "Kehlenschnitt", "description": "Praeziser Nahkampfangriff mit hohem Grundschaden.", "effect": "damage", "power": 15.0, "scale_stat": "melee", "scale": 2.4, "stamina_cost": 10.0, "energy_cost": 2.0, "icon": "res://assets/items/weapons/melee/rusty_knife.svg", "sound": "res://assets/audio/sfx/weapons/melee_hit.wav", "color": "#ffd27a"},
-		{"id": "scout_smoke_feint", "name": "Nebeltritt", "description": "Ausweichen, kleine Ausdauererholung und weniger Schaden.", "effect": "recover_defend", "power": 10.0, "scale_stat": "defense", "scale": 1.0, "stamina_cost": 3.0, "energy_cost": 4.0, "defense_multiplier": 0.35, "icon": "res://assets/ui/icons/energy.svg", "sound": "res://assets/audio/sfx/environment/wave_warning.wav", "color": "#9fb7ff"},
+		{"id": "scout_smoke_feint", "name": "Nebeltritt", "description": "Ausweichen, kleine Ausdauererholung und weniger Schaden.", "effect": "recover_defend", "power": 10.0, "scale_stat": "defense", "scale": 1.0, "stamina_cost": 3.0, "energy_cost": 4.0, "defense_multiplier": 0.35, "icon": "res://assets/ui/icons/energy.png", "sound": "res://assets/audio/sfx/environment/wave_warning.wav", "color": "#9fb7ff"},
 		{"id": "scout_weak_point", "name": "Schwachstelle", "description": "Treffer auf eine offene Stelle, skaliert mit Schusswaffen.", "effect": "damage", "power": 13.0, "scale_stat": "ranged", "scale": 2.7, "stamina_cost": 7.0, "energy_cost": 5.0, "icon": "res://assets/items/weapons/ranged/old_revolver.svg", "sound": "res://assets/audio/sfx/weapons/gunshot.wav", "color": "#ffb36a"},
-		{"id": "scout_adrenaline", "name": "Adrenalinsprung", "description": "Gewinnt Ausdauer und Energie zurueck.", "effect": "recover", "power": 18.0, "scale_stat": "melee", "scale": 1.2, "stamina_cost": 0.0, "energy_cost": 0.0, "icon": "res://assets/ui/icons/stamina.svg", "sound": "res://assets/audio/sfx/ui/loot.wav", "color": "#b8ff8f"},
-		{"id": "scout_flank", "name": "Flankieren", "description": "Angriff aus der Seite und leichter Schutz.", "effect": "damage_defend", "power": 17.0, "scale_stat": "melee", "scale": 2.1, "stamina_cost": 11.0, "energy_cost": 4.0, "defense_multiplier": 0.65, "icon": "res://assets/ui/icons/stamina.svg", "sound": "res://assets/audio/sfx/weapons/melee_hit.wav", "color": "#ffe08a"},
+		{"id": "scout_adrenaline", "name": "Adrenalinsprung", "description": "Gewinnt Ausdauer und Energie zurueck.", "effect": "recover", "power": 18.0, "scale_stat": "melee", "scale": 1.2, "stamina_cost": 0.0, "energy_cost": 0.0, "icon": "res://assets/ui/icons/stamina.png", "sound": "res://assets/audio/sfx/ui/loot.wav", "color": "#b8ff8f"},
+		{"id": "scout_flank", "name": "Flankieren", "description": "Angriff aus der Seite und leichter Schutz.", "effect": "damage_defend", "power": 17.0, "scale_stat": "melee", "scale": 2.1, "stamina_cost": 11.0, "energy_cost": 4.0, "defense_multiplier": 0.65, "icon": "res://assets/ui/icons/stamina.png", "sound": "res://assets/audio/sfx/weapons/melee_hit.wav", "color": "#ffe08a"},
 		{"id": "scout_silent_shot", "name": "Lautloser Schuss", "description": "Starker Fernangriff, wenn Schusswaffen trainiert sind.", "effect": "damage", "power": 20.0, "scale_stat": "ranged", "scale": 3.0, "stamina_cost": 8.0, "energy_cost": 8.0, "icon": "res://assets/items/weapons/ranged/hunting_rifle.svg", "sound": "res://assets/audio/sfx/weapons/gunshot.wav", "color": "#ffc069"},
 		{"id": "scout_tripwire", "name": "Stolperdraht", "description": "Schwacher Treffer, aber der Gegenschlag wird stark gebremst.", "effect": "snare", "power": 8.0, "scale_stat": "crafting", "scale": 2.0, "stamina_cost": 6.0, "energy_cost": 6.0, "defense_multiplier": 0.38, "icon": "res://assets/items/materials/nails.svg", "sound": "res://assets/audio/sfx/ui/craft.wav", "color": "#d7c79a"},
-		{"id": "scout_vanish", "name": "Rueckzug", "description": "Kaum Schaden, dafuer sehr starker Schutz fuer den naechsten Angriff.", "effect": "defend", "power": 12.0, "scale_stat": "defense", "scale": 1.0, "stamina_cost": 4.0, "energy_cost": 5.0, "defense_multiplier": 0.22, "icon": "res://assets/ui/icons/shield.svg", "sound": "res://assets/audio/sfx/environment/wave_warning.wav", "color": "#9bb8ff"},
+		{"id": "scout_vanish", "name": "Rueckzug", "description": "Kaum Schaden, dafuer sehr starker Schutz fuer den naechsten Angriff.", "effect": "defend", "power": 12.0, "scale_stat": "defense", "scale": 1.0, "stamina_cost": 4.0, "energy_cost": 5.0, "defense_multiplier": 0.22, "icon": "res://assets/ui/icons/shield.png", "sound": "res://assets/audio/sfx/environment/wave_warning.wav", "color": "#9bb8ff"},
 		{"id": "scout_night_hunter", "name": "Nachtjaeger", "description": "Sehr schwerer Einzelangriff.", "effect": "damage", "power": 30.0, "scale_stat": "melee", "scale": 3.2, "stamina_cost": 18.0, "energy_cost": 12.0, "icon": "res://assets/items/weapons/melee/machete.svg", "sound": "res://assets/audio/sfx/weapons/melee_hit.wav", "color": "#ff9a63"},
-		{"id": "scout_survival_instinct", "name": "Ueberlebensinstinkt", "description": "Schild und Ausdauer in einem riskanten Moment.", "effect": "shield_recover", "power": 16.0, "scale_stat": "defense", "scale": 1.5, "stamina_cost": 0.0, "energy_cost": 8.0, "icon": "res://assets/ui/icons/shield.svg", "sound": "res://assets/audio/sfx/ui/loot.wav", "color": "#a8f0ff"}
+		{"id": "scout_survival_instinct", "name": "Ueberlebensinstinkt", "description": "Schild und Ausdauer in einem riskanten Moment.", "effect": "shield_recover", "power": 16.0, "scale_stat": "defense", "scale": 1.5, "stamina_cost": 0.0, "energy_cost": 8.0, "icon": "res://assets/ui/icons/shield.png", "sound": "res://assets/audio/sfx/ui/loot.wav", "color": "#a8f0ff"}
 	],
 	"medic": [
 		{"id": "medic_field_dressing", "name": "Notversorgung", "description": "Heilt im Kampf sofort Leben.", "effect": "heal", "power": 18.0, "scale_stat": "defense", "scale": 2.0, "stamina_cost": 4.0, "energy_cost": 8.0, "icon": "res://assets/items/medical/bandage.svg", "sound": "res://assets/audio/sfx/ui/craft.wav", "color": "#8fffa8"},
@@ -86,23 +98,23 @@ const CLASS_ABILITIES := {
 		{"id": "medic_triage", "name": "Triage", "description": "Grosse Heilung, aber teuer.", "effect": "heal", "power": 30.0, "scale_stat": "defense", "scale": 2.6, "stamina_cost": 6.0, "energy_cost": 16.0, "icon": "res://assets/items/medical/bandage.svg", "sound": "res://assets/audio/sfx/ui/craft.wav", "color": "#77ff9e"},
 		{"id": "medic_bitter_dose", "name": "Bittere Dosis", "description": "Schwacher Treffer und Schutz durch Schmerzblockade.", "effect": "damage_defend", "power": 9.0, "scale_stat": "crafting", "scale": 2.0, "stamina_cost": 5.0, "energy_cost": 8.0, "defense_multiplier": 0.55, "icon": "res://assets/items/medical/painkillers.svg", "sound": "res://assets/audio/sfx/ui/craft.wav", "color": "#e7ffa8"},
 		{"id": "medic_antibiotic_push", "name": "Antibiotischer Schub", "description": "Heilt, reinigt und gibt Schild.", "effect": "cleanse_shield", "power": 16.0, "scale_stat": "crafting", "scale": 1.8, "stamina_cost": 4.0, "energy_cost": 12.0, "shield": 12.0, "icon": "res://assets/items/medical/antibiotics.svg", "sound": "res://assets/audio/sfx/ui/craft.wav", "color": "#aaffef"},
-		{"id": "medic_pressure_point", "name": "Druckpunkt", "description": "Praeziser Treffer, der den naechsten Schaden senkt.", "effect": "snare", "power": 14.0, "scale_stat": "melee", "scale": 2.2, "stamina_cost": 9.0, "energy_cost": 7.0, "defense_multiplier": 0.50, "icon": "res://assets/ui/icons/health.svg", "sound": "res://assets/audio/sfx/weapons/melee_hit.wav", "color": "#ffd69a"},
-		{"id": "medic_last_reserve", "name": "Letzte Reserve", "description": "Sehr starke Heilung, wenn du fast faellst.", "effect": "heal", "power": 42.0, "scale_stat": "defense", "scale": 2.8, "stamina_cost": 4.0, "energy_cost": 18.0, "icon": "res://assets/ui/icons/health.svg", "sound": "res://assets/audio/sfx/ui/loot.wav", "color": "#8cffb1"},
+		{"id": "medic_pressure_point", "name": "Druckpunkt", "description": "Praeziser Treffer, der den naechsten Schaden senkt.", "effect": "snare", "power": 14.0, "scale_stat": "melee", "scale": 2.2, "stamina_cost": 9.0, "energy_cost": 7.0, "defense_multiplier": 0.50, "icon": "res://assets/ui/icons/health.png", "sound": "res://assets/audio/sfx/weapons/melee_hit.wav", "color": "#ffd69a"},
+		{"id": "medic_last_reserve", "name": "Letzte Reserve", "description": "Sehr starke Heilung, wenn du fast faellst.", "effect": "heal", "power": 42.0, "scale_stat": "defense", "scale": 2.8, "stamina_cost": 4.0, "energy_cost": 18.0, "icon": "res://assets/ui/icons/health.png", "sound": "res://assets/audio/sfx/ui/loot.wav", "color": "#8cffb1"},
 		{"id": "medic_bone_saw", "name": "Knochensaege", "description": "Brutaler Nahkampfangriff.", "effect": "damage", "power": 26.0, "scale_stat": "melee", "scale": 2.8, "stamina_cost": 16.0, "energy_cost": 9.0, "icon": "res://assets/items/weapons/melee/machete.svg", "sound": "res://assets/audio/sfx/weapons/melee_hit.wav", "color": "#ff9f7a"},
-		{"id": "medic_oath", "name": "Eid des Helfers", "description": "Schild, Heilung und etwas Energie.", "effect": "heal_shield", "power": 18.0, "scale_stat": "defense", "scale": 2.0, "stamina_cost": 0.0, "energy_cost": 12.0, "shield": 18.0, "icon": "res://assets/ui/icons/shield.svg", "sound": "res://assets/audio/sfx/ui/loot.wav", "color": "#bfffd8"}
+		{"id": "medic_oath", "name": "Eid des Helfers", "description": "Schild, Heilung und etwas Energie.", "effect": "heal_shield", "power": 18.0, "scale_stat": "defense", "scale": 2.0, "stamina_cost": 0.0, "energy_cost": 12.0, "shield": 18.0, "icon": "res://assets/ui/icons/shield.png", "sound": "res://assets/audio/sfx/ui/loot.wav", "color": "#bfffd8"}
 	],
 	"guardian": [
-		{"id": "guardian_shield_wall", "name": "Schildwall", "description": "Starker Schutz und stabiler Konter.", "effect": "damage_defend", "power": 8.0, "scale_stat": "defense", "scale": 2.5, "stamina_cost": 7.0, "energy_cost": 4.0, "defense_multiplier": 0.25, "icon": "res://assets/ui/icons/shield.svg", "sound": "res://assets/audio/sfx/environment/wave_warning.wav", "color": "#9bb8ff"},
-		{"id": "guardian_bash", "name": "Schildschlag", "description": "Verteidigungsangriff mit Schild-Skalierung.", "effect": "damage", "power": 14.0, "scale_stat": "defense", "scale": 2.8, "stamina_cost": 10.0, "energy_cost": 3.0, "icon": "res://assets/ui/icons/shield.svg", "sound": "res://assets/audio/sfx/weapons/melee_hit.wav", "color": "#c8d7ff"},
+		{"id": "guardian_shield_wall", "name": "Schildwall", "description": "Starker Schutz und stabiler Konter.", "effect": "damage_defend", "power": 8.0, "scale_stat": "defense", "scale": 2.5, "stamina_cost": 7.0, "energy_cost": 4.0, "defense_multiplier": 0.25, "icon": "res://assets/ui/icons/shield.png", "sound": "res://assets/audio/sfx/environment/wave_warning.wav", "color": "#9bb8ff"},
+		{"id": "guardian_bash", "name": "Schildschlag", "description": "Verteidigungsangriff mit Schild-Skalierung.", "effect": "damage", "power": 14.0, "scale_stat": "defense", "scale": 2.8, "stamina_cost": 10.0, "energy_cost": 3.0, "icon": "res://assets/ui/icons/shield.png", "sound": "res://assets/audio/sfx/weapons/melee_hit.wav", "color": "#c8d7ff"},
 		{"id": "guardian_warning_shot", "name": "Warnschuss", "description": "Fernangriff und weniger Druck durch den Gegner.", "effect": "snare", "power": 13.0, "scale_stat": "ranged", "scale": 2.4, "stamina_cost": 7.0, "energy_cost": 6.0, "defense_multiplier": 0.60, "icon": "res://assets/items/weapons/ranged/old_revolver.svg", "sound": "res://assets/audio/sfx/weapons/gunshot.wav", "color": "#ffd08a"},
-		{"id": "guardian_hold_line", "name": "Linie halten", "description": "Schild und sehr guter Schutz fuer den naechsten Schlag.", "effect": "shield_defend", "power": 12.0, "scale_stat": "defense", "scale": 2.0, "stamina_cost": 5.0, "energy_cost": 4.0, "defense_multiplier": 0.28, "icon": "res://assets/ui/icons/shield.svg", "sound": "res://assets/audio/sfx/environment/wave_warning.wav", "color": "#a9c5ff"},
+		{"id": "guardian_hold_line", "name": "Linie halten", "description": "Schild und sehr guter Schutz fuer den naechsten Schlag.", "effect": "shield_defend", "power": 12.0, "scale_stat": "defense", "scale": 2.0, "stamina_cost": 5.0, "energy_cost": 4.0, "defense_multiplier": 0.28, "icon": "res://assets/ui/icons/shield.png", "sound": "res://assets/audio/sfx/environment/wave_warning.wav", "color": "#a9c5ff"},
 		{"id": "guardian_counter", "name": "Konterstand", "description": "Schaden, Schild und guter Gegenschlagschutz.", "effect": "damage_shield_defend", "power": 12.0, "scale_stat": "defense", "scale": 2.4, "stamina_cost": 11.0, "energy_cost": 5.0, "shield": 8.0, "defense_multiplier": 0.48, "icon": "res://assets/items/armor/leather_vest.svg", "sound": "res://assets/audio/sfx/weapons/melee_hit.wav", "color": "#b7c9ff"},
 		{"id": "guardian_hammer_arc", "name": "Brecherbogen", "description": "Schwerer Nahkampfangriff.", "effect": "damage", "power": 24.0, "scale_stat": "melee", "scale": 2.6, "stamina_cost": 16.0, "energy_cost": 7.0, "icon": "res://assets/items/weapons/melee/crowbar.svg", "sound": "res://assets/audio/sfx/weapons/melee_hit.wav", "color": "#ffb184"},
 		{"id": "guardian_covering_fire", "name": "Deckungsfeuer", "description": "Fernschaden und deutlicher Schutz.", "effect": "damage_defend", "power": 18.0, "scale_stat": "ranged", "scale": 2.7, "stamina_cost": 10.0, "energy_cost": 9.0, "defense_multiplier": 0.45, "icon": "res://assets/items/weapons/ranged/pump_shotgun.svg", "sound": "res://assets/audio/sfx/weapons/gunshot.wav", "color": "#ffd58a"},
-		{"id": "guardian_taunt", "name": "Provozieren", "description": "Kaum Schaden, aber extrem viel Schutz.", "effect": "defend", "power": 14.0, "scale_stat": "defense", "scale": 1.5, "stamina_cost": 4.0, "energy_cost": 5.0, "defense_multiplier": 0.18, "icon": "res://assets/ui/icons/shield.svg", "sound": "res://assets/audio/sfx/enemies/growl.wav", "color": "#c6d5ff"},
+		{"id": "guardian_taunt", "name": "Provozieren", "description": "Kaum Schaden, aber extrem viel Schutz.", "effect": "defend", "power": 14.0, "scale_stat": "defense", "scale": 1.5, "stamina_cost": 4.0, "energy_cost": 5.0, "defense_multiplier": 0.18, "icon": "res://assets/ui/icons/shield.png", "sound": "res://assets/audio/sfx/enemies/growl.wav", "color": "#c6d5ff"},
 		{"id": "guardian_bastion", "name": "Bastion", "description": "Massiver Schildaufbau.", "effect": "shield", "power": 28.0, "scale_stat": "defense", "scale": 3.0, "stamina_cost": 8.0, "energy_cost": 12.0, "icon": "res://assets/items/armor/scrap_helmet.svg", "sound": "res://assets/audio/sfx/environment/wave_warning.wav", "color": "#a8bdff"},
-		{"id": "guardian_last_stand", "name": "Letzter Stand", "description": "Grosser Konter und starker Schutz.", "effect": "damage_shield_defend", "power": 28.0, "scale_stat": "defense", "scale": 3.0, "stamina_cost": 18.0, "energy_cost": 14.0, "shield": 18.0, "defense_multiplier": 0.30, "icon": "res://assets/ui/icons/health.svg", "sound": "res://assets/audio/sfx/weapons/melee_hit.wav", "color": "#ffe0a0"},
-		{"id": "guardian_anchor", "name": "Ankerpunkt", "description": "Ausdauer zurueck und Schild halten.", "effect": "shield_recover", "power": 14.0, "scale_stat": "defense", "scale": 2.0, "stamina_cost": 0.0, "energy_cost": 6.0, "icon": "res://assets/ui/icons/stamina.svg", "sound": "res://assets/audio/sfx/ui/loot.wav", "color": "#a9cfff"}
+		{"id": "guardian_last_stand", "name": "Letzter Stand", "description": "Grosser Konter und starker Schutz.", "effect": "damage_shield_defend", "power": 28.0, "scale_stat": "defense", "scale": 3.0, "stamina_cost": 18.0, "energy_cost": 14.0, "shield": 18.0, "defense_multiplier": 0.30, "icon": "res://assets/ui/icons/health.png", "sound": "res://assets/audio/sfx/weapons/melee_hit.wav", "color": "#ffe0a0"},
+		{"id": "guardian_anchor", "name": "Ankerpunkt", "description": "Ausdauer zurueck und Schild halten.", "effect": "shield_recover", "power": 14.0, "scale_stat": "defense", "scale": 2.0, "stamina_cost": 0.0, "energy_cost": 6.0, "icon": "res://assets/ui/icons/stamina.png", "sound": "res://assets/audio/sfx/ui/loot.wav", "color": "#a9cfff"}
 	],
 	"tinker": [
 		{"id": "tinker_scrap_charge", "name": "Improvisierte Ladung", "description": "Schrottexplosion; mit Metall und Naegeln staerker.", "effect": "material_damage", "power": 13.0, "scale_stat": "crafting", "scale": 3.0, "stamina_cost": 6.0, "energy_cost": 8.0, "item_cost": {"metal": 1, "nails": 1}, "bonus_power": 12.0, "icon": "res://assets/items/materials/powder.svg", "sound": "res://assets/audio/sfx/ui/craft.wav", "color": "#ffca7a"},
@@ -127,12 +139,12 @@ func _ready() -> void:
 		_initialize_class_abilities()
 
 
-func new_game(gender: String, class_id: String = "scout", display_name: String = "Morgan", appearance_id: String = "wanderer") -> void:
+func new_game(class_id: String = "scout", display_name: String = "Morgan") -> void:
 	_reset_runtime_state()
 	game_active = true
-	player_gender = gender
+	player_gender = "female"
 	player_class = class_id
-	player_appearance = appearance_id if APPEARANCE_OPTIONS.has(appearance_id) else "wanderer"
+	player_appearance = appearance_for_class(class_id)
 	player_name = display_name.strip_edges()
 	if player_name.is_empty():
 		player_name = "Morgan"
@@ -162,7 +174,8 @@ func new_game(gender: String, class_id: String = "scout", display_name: String =
 func _reset_runtime_state() -> void:
 	player_stats = RpgRules.default_player_stats()
 	player_class = "scout"
-	player_appearance = "wanderer"
+	player_appearance = "priest"
+	companion = {}
 	elena = {"health": 100.0, "max_health": 100.0, "stress": 15.0}
 	base_state = _default_base_state()
 	survivors = []
@@ -176,7 +189,12 @@ func _reset_runtime_state() -> void:
 	claimed_ability_levels = []
 	pending_ability_picks = 0
 	current_location = "base"
+	return_scene = "res://scenes/world_map/world_map.tscn"
+	story_return_scene = "res://scenes/world_map/world_map.tscn"
 	pending_story = ""
+	pending_map_event_id = ""
+	pending_map_travel_event = false
+	pending_map_event_data = {}
 	run_statistics = {
 		"loot_collected": 0,
 		"enemies_defeated": 0,
@@ -190,11 +208,17 @@ func _reset_runtime_state() -> void:
 func change_stat(stat_name: String, amount: float) -> void:
 	if not player_stats.has(stat_name):
 		return
-	var maximum := float(player_stats.get("max_" + stat_name, 100.0))
+	var maximum := _stat_maximum(stat_name)
 	player_stats[stat_name] = clampf(float(player_stats[stat_name]) + amount, 0.0, maximum)
 	if stat_name == "health" and float(player_stats.health) <= 0.0:
 		EventBus.game_over.emit("Du bist den Wunden der letzten Tage erlegen.")
 	EventBus.stats_changed.emit()
+
+
+func _stat_maximum(stat_name: String) -> float:
+	if stat_name in ["health", "stamina", "energy", "mana"]:
+		return max_resource(stat_name)
+	return float(player_stats.get("max_" + stat_name, 100.0))
 
 
 func spend_for_action(stamina_cost: float, energy_cost: float, hunger_cost: float = 2.0, thirst_cost: float = 3.0) -> void:
@@ -207,11 +231,60 @@ func spend_for_action(stamina_cost: float, energy_cost: float, hunger_cost: floa
 
 
 func rest_player() -> void:
-	player_stats.stamina = 100.0
-	player_stats.energy = 100.0
-	if not status_effects.has("well_rested"):
+	rest_for_hours(10)
+
+
+const REST_MAX_HOURS := 10
+
+
+func rest_for_hours(hours: int) -> Dictionary:
+	var rested_hours := clampi(hours, 1, REST_MAX_HOURS)
+	var ratio := float(rested_hours) / float(REST_MAX_HOURS)
+	var stamina_before := float(player_stats.get("stamina", 0.0))
+	var energy_before := float(player_stats.get("energy", 0.0))
+	var health_before := float(player_stats.get("health", 0.0))
+	var hunger_before := float(player_stats.get("hunger", 0.0))
+	var thirst_before := float(player_stats.get("thirst", 0.0))
+	change_stat("stamina", max_resource("stamina") * ratio)
+	change_stat("energy", max_resource("energy") * ratio)
+	change_stat("health", max_resource("health") * ratio * 0.30)
+	change_stat("hunger", 100.0 * ratio * 0.20)
+	change_stat("thirst", 100.0 * ratio * 0.20)
+	if rested_hours >= 5 and not status_effects.has("well_rested"):
 		status_effects.append("well_rested")
-	EventBus.stats_changed.emit()
+	return {
+		"hours": rested_hours,
+		"stamina": float(player_stats.get("stamina", 0.0)) - stamina_before,
+		"energy": float(player_stats.get("energy", 0.0)) - energy_before,
+		"health": float(player_stats.get("health", 0.0)) - health_before,
+		"hunger": float(player_stats.get("hunger", 0.0)) - hunger_before,
+		"thirst": float(player_stats.get("thirst", 0.0)) - thirst_before,
+	}
+
+
+func apply_rest_route_points(hours: int, max_points: int = 4) -> int:
+	var preview := preview_rest_route_points(hours, max_points)
+	quest_flags["route_points"] = int(preview.next)
+	return int(preview.next)
+
+
+func preview_rest_gains(hours: int) -> Dictionary:
+	var rested_hours := clampi(hours, 1, REST_MAX_HOURS)
+	var ratio := float(rested_hours) / float(REST_MAX_HOURS)
+	return {
+		"stamina": mini(max_resource("stamina"), float(player_stats.get("stamina", 0.0)) + max_resource("stamina") * ratio) - float(player_stats.get("stamina", 0.0)),
+		"energy": mini(max_resource("energy"), float(player_stats.get("energy", 0.0)) + max_resource("energy") * ratio) - float(player_stats.get("energy", 0.0)),
+		"health": mini(max_resource("health"), float(player_stats.get("health", 0.0)) + max_resource("health") * ratio * 0.30) - float(player_stats.get("health", 0.0)),
+		"hunger": mini(100.0, float(player_stats.get("hunger", 0.0)) + 100.0 * ratio * 0.20) - float(player_stats.get("hunger", 0.0)),
+		"thirst": mini(100.0, float(player_stats.get("thirst", 0.0)) + 100.0 * ratio * 0.20) - float(player_stats.get("thirst", 0.0)),
+	}
+
+
+func preview_rest_route_points(hours: int, max_points: int = 4) -> Dictionary:
+	var rested_hours := clampi(hours, 1, REST_MAX_HOURS)
+	var restored := ceili(float(max_points) * float(rested_hours) / float(REST_MAX_HOURS))
+	var current := clampi(int(quest_flags.get("route_points", max_points)), 0, max_points)
+	return {"current": current, "next": mini(max_points, maxi(current, restored))}
 
 
 func care_for_elena(kind: String) -> String:
@@ -249,9 +322,38 @@ func damage_elena(amount: float) -> void:
 
 
 func damage_base(amount: float) -> void:
-	base_state.integrity = maxf(0.0, float(base_state.integrity) - amount)
+	var module_share := amount * 0.5
+	var integrity_share := amount - module_share
+	EventBus.base_wave_damage.emit(module_share)
+	apply_placement_wave_damage(module_share)
+	base_state.integrity = maxf(0.0, float(base_state.integrity) - integrity_share)
 	elena.stress = minf(100.0, float(elena.stress) + amount * 0.25)
 	EventBus.stats_changed.emit()
+
+
+func apply_placement_wave_damage(amount: float) -> void:
+	if amount <= 0.0:
+		return
+	_normalize_base_state()
+	var entries: Array[Dictionary] = []
+	var total_weight: float = 0.0
+	for slot_id in DataCatalog.surface_slots():
+		var structure_id: String = surface_placement(str(slot_id))
+		if structure_id.is_empty():
+			continue
+		var module_id: String = "placement_%s" % slot_id
+		if is_module_destroyed(module_id):
+			continue
+		var structure: Dictionary = DataCatalog.structure(structure_id)
+		var weight: float = maxf(0.1, float(structure.get("defense", 1)))
+		var max_hp: float = maxf(40.0, weight * 15.0)
+		entries.append({"module_id": module_id, "weight": weight, "max_hp": max_hp})
+		total_weight += weight
+	if total_weight <= 0.0:
+		return
+	for entry in entries:
+		var share: float = amount * (float(entry["weight"]) / total_weight)
+		damage_module(str(entry["module_id"]), share, float(entry["max_hp"]))
 
 
 func build_structure(structure_id: String) -> bool:
@@ -282,7 +384,9 @@ func _default_base_state() -> Dictionary:
 		"structures": {},
 		"unlocked_rooms": unlocked,
 		"surface_placements": placements,
-		"elena_room": "shaft_room"
+		"elena_room": "shaft_room",
+		"module_health": {},
+		"destroyed_modules": []
 	}
 
 
@@ -295,6 +399,62 @@ func _normalize_base_state() -> void:
 			base_state.surface_placements[room_id] = ""
 	if not base_state.has("elena_room"):
 		base_state.elena_room = "shaft_room"
+	if not base_state.has("module_health"):
+		base_state.module_health = {}
+	if not base_state.has("destroyed_modules"):
+		base_state.destroyed_modules = []
+
+
+func module_health(module_id: String, default_max: float) -> float:
+	_normalize_base_state()
+	if is_module_destroyed(module_id):
+		return 0.0
+	if not base_state.module_health.has(module_id):
+		base_state.module_health[module_id] = default_max
+	return float(base_state.module_health[module_id])
+
+
+func damage_module(module_id: String, amount: float, default_max: float) -> float:
+	_normalize_base_state()
+	if is_module_destroyed(module_id):
+		return 0.0
+	var current := module_health(module_id, default_max)
+	var applied := minf(amount, current)
+	base_state.module_health[module_id] = maxf(0.0, current - applied)
+	if float(base_state.module_health[module_id]) <= 0.0:
+		mark_module_destroyed(module_id)
+	return applied
+
+
+func repair_module(module_id: String, amount: float, default_max: float) -> void:
+	_normalize_base_state()
+	var restored := destroyed_modules()
+	restored.erase(module_id)
+	base_state.destroyed_modules = restored
+	var current := float(base_state.module_health.get(module_id, default_max))
+	if amount < 0.0:
+		base_state.module_health[module_id] = default_max
+	else:
+		base_state.module_health[module_id] = minf(default_max, current + amount)
+
+
+func is_module_destroyed(module_id: String) -> bool:
+	_normalize_base_state()
+	return module_id in base_state.destroyed_modules
+
+
+func mark_module_destroyed(module_id: String) -> void:
+	_normalize_base_state()
+	if not is_module_destroyed(module_id):
+		var destroyed: Array = base_state.destroyed_modules.duplicate()
+		destroyed.append(module_id)
+		base_state.destroyed_modules = destroyed
+	base_state.module_health[module_id] = 0.0
+
+
+func destroyed_modules() -> Array:
+	_normalize_base_state()
+	return base_state.destroyed_modules.duplicate()
 
 
 func is_room_unlocked(room_id: String) -> bool:
@@ -422,6 +582,14 @@ func recruit_survivor(survivor_id: String, display_name: String, role: String) -
 	return true
 
 
+func is_admin_godmode() -> bool:
+	return bool(quest_flags.get("admin_godmode", false))
+
+
+func set_admin_godmode(enabled: bool) -> void:
+	quest_flags["admin_godmode"] = enabled
+
+
 func count_role(role: String) -> int:
 	var count := 0
 	for survivor in survivors:
@@ -446,18 +614,255 @@ func player_appearance_name() -> String:
 	return str(APPEARANCE_OPTIONS.get(player_appearance, {}).get("name", player_appearance))
 
 
-func player_appearance_path(gender_override: String = "", appearance_override: String = "") -> String:
+func appearance_for_class(class_id: String) -> String:
+	match class_id:
+		"scout":
+			return "priest"
+		"medic":
+			return "mara_hollow"
+		"guardian":
+			return "guardian"
+		"tinker":
+			return "mechanic"
+		_:
+			return "priest"
+
+
+func player_appearance_path(
+	gender_override: String = "",
+	appearance_override: String = "",
+	visual_context: CharacterVisualContext.Context = CharacterVisualContext.Context.SHOWCASE
+) -> String:
 	var gender := gender_override if not gender_override.is_empty() else player_gender
 	var appearance_id := appearance_override if not appearance_override.is_empty() else player_appearance
 	if not APPEARANCE_OPTIONS.has(appearance_id):
-		appearance_id = "wanderer"
+		appearance_id = "priest"
 	if gender != "male":
 		gender = "female"
+	if visual_context == CharacterVisualContext.Context.PORTRAIT:
+		return player_appearance_portrait_path(gender, appearance_id)
+	if appearance_id == "mara_hollow":
+		if visual_context == CharacterVisualContext.Context.COMBAT:
+			return MaraHollowIdleFrames.atlas_path(CharacterVisualContext.Context.COMBAT)
+		return MaraHollowIdleFrames.atlas_path(CharacterVisualContext.Context.SHOWCASE)
+	if appearance_id == "priest":
+		if visual_context == CharacterVisualContext.Context.COMBAT:
+			return PriestIdleFrames.atlas_path(CharacterVisualContext.Context.COMBAT)
+		return PriestIdleFrames.atlas_path(CharacterVisualContext.Context.SHOWCASE)
+	if visual_context == CharacterVisualContext.Context.COMBAT:
+		return "res://assets/characters/player_variants/combat/%s_%s.png" % [gender, appearance_id]
 	return "res://assets/characters/player_variants/%s_%s.png" % [gender, appearance_id]
+
+
+func player_appearance_portrait_path(gender_override: String = "", appearance_override: String = "") -> String:
+	var gender := gender_override if not gender_override.is_empty() else player_gender
+	var appearance_id := appearance_override if not appearance_override.is_empty() else player_appearance
+	if not APPEARANCE_OPTIONS.has(appearance_id):
+		appearance_id = "priest"
+	if gender != "male":
+		gender = "female"
+	match appearance_id:
+		"mara_hollow":
+			return MaraHollowIdleFrames.portrait_path()
+		"priest":
+			return PriestIdleFrames.portrait_path()
+		_:
+			return "res://assets/characters/player_variants/portraits/%s_%s.png" % [gender, appearance_id]
+
+
+func appearance_uses_idle_animation(appearance_override: String = "") -> bool:
+	var appearance_id := appearance_override if not appearance_override.is_empty() else player_appearance
+	return appearance_id == "mara_hollow" or appearance_id == "priest"
+
+
+func appearance_has_hit_animation(appearance_override: String = "") -> bool:
+	var appearance_id := appearance_override if not appearance_override.is_empty() else player_appearance
+	return appearance_id == "mara_hollow" or appearance_id == "priest"
 
 
 func effective_player_stats() -> Dictionary:
 	return RpgRules.effective_stats(player_stats, InventorySystem.equipment_stat_bonuses())
+
+
+func has_companion() -> bool:
+	return not companion.is_empty() and not str(companion.get("class_id", "")).is_empty()
+
+
+func available_companion_classes() -> Array[String]:
+	var result: Array[String] = []
+	for class_id in DataCatalog.player_config().get("classes", {}):
+		if str(class_id) == player_class:
+			continue
+		if has_companion() and str(companion.get("class_id", "")) == str(class_id):
+			continue
+		result.append(str(class_id))
+	return result
+
+
+func recruit_companion(class_id: String) -> bool:
+	if class_id.is_empty() or class_id == player_class:
+		return false
+	if not DataCatalog.player_config().get("classes", {}).has(class_id):
+		return false
+	companion = _build_companion_state(class_id)
+	EventBus.stats_changed.emit()
+	return true
+
+
+func dismiss_companion() -> void:
+	companion = {}
+	EventBus.stats_changed.emit()
+
+
+func companion_stats() -> Dictionary:
+	return companion.get("stats", {}) if has_companion() else {}
+
+
+func effective_companion_stats() -> Dictionary:
+	if not has_companion():
+		return RpgRules.default_player_stats()
+	return RpgRules.effective_stats(companion_stats(), {})
+
+
+func companion_class_name() -> String:
+	if not has_companion():
+		return ""
+	return str(DataCatalog.player_config().get("classes", {}).get(companion.get("class_id", ""), {}).get("name", companion.get("class_id", "")))
+
+
+func companion_appearance_path(
+	visual_context: CharacterVisualContext.Context = CharacterVisualContext.Context.SHOWCASE
+) -> String:
+	if not has_companion():
+		return player_appearance_path("", "", visual_context)
+	return player_appearance_path(
+		str(companion.get("gender", "female")),
+		str(companion.get("appearance", "priest")),
+		visual_context
+	)
+
+
+func companion_appearance_portrait_path() -> String:
+	if not has_companion():
+		return player_appearance_portrait_path()
+	return player_appearance_portrait_path(
+		str(companion.get("gender", "female")),
+		str(companion.get("appearance", "priest"))
+	)
+
+
+func companion_abilities() -> Array:
+	if not has_companion():
+		return []
+	return class_abilities(str(companion.get("class_id", "")))
+
+
+func companion_ability(ability_id: String) -> Dictionary:
+	for data in companion_abilities():
+		if str(data.get("id", "")) == ability_id:
+			return data
+	return {}
+
+
+func companion_ability_slot_id(index: int) -> String:
+	if not has_companion():
+		return ""
+	var equipped: Array = companion.get("equipped_abilities", [])
+	if index < 0 or index >= MAX_EQUIPPED_ABILITIES or index >= equipped.size():
+		return ""
+	return str(equipped[index])
+
+
+func companion_learned_abilities() -> Array[String]:
+	var result: Array[String] = []
+	if not has_companion():
+		return result
+	for ability_id in companion.get("learned_abilities", []):
+		result.append(str(ability_id))
+	return result
+
+
+func companion_change_stat(stat_name: String, amount: float) -> void:
+	if not has_companion():
+		return
+	var stats: Dictionary = companion.stats
+	if not stats.has(stat_name):
+		return
+	var maximum := float(stats.get("max_" + stat_name, 100.0))
+	stats[stat_name] = clampf(float(stats[stat_name]) + amount, 0.0, maximum)
+	companion.stats = stats
+	EventBus.stats_changed.emit()
+
+
+func companion_ability_action_points(ability_id: String) -> int:
+	var data := companion_ability(ability_id)
+	if data.is_empty():
+		return 0
+	var effect := str(data.get("effect", "damage"))
+	var power := float(data.get("power", 0.0))
+	var cost := 2
+	if effect in ["defend", "shield", "shield_defend", "recover", "recover_defend", "shield_recover", "shield_recover_defend"]:
+		cost = 1
+	elif effect in ["heal", "cleanse_heal", "cleanse_shield", "heal_shield"]:
+		cost = 2
+	elif effect in ["material_damage", "damage_shield_defend"]:
+		cost = 3
+	if power >= 28.0 or float(data.get("stamina_cost", 0.0)) >= 16.0:
+		cost += 1
+	return clampi(cost, 1, 4)
+
+
+func _build_companion_state(class_id: String) -> Dictionary:
+	var preset: Dictionary = COMPANION_PRESETS.get(class_id, {"name": "Fremder", "gender": "female", "appearance": "priest"})
+	var config := DataCatalog.player_config()
+	var stats := RpgRules.normalize_stats(config.get("stats", {}).duplicate(true))
+	var companion_class_bonus: Dictionary = config.get("classes", {}).get(class_id, {})
+	for stat_name in companion_class_bonus.get("stat_bonus", {}):
+		stats[stat_name] = float(stats.get(stat_name, 0.0)) + float(companion_class_bonus.stat_bonus[stat_name])
+	stats.level = int(player_stats.get("level", 1))
+	stats.xp = int(player_stats.get("xp", 0))
+	stats.next_xp = int(player_stats.get("next_xp", 60))
+	var learned: Array[String] = []
+	var equipped: Array[String] = []
+	for data in class_abilities(class_id):
+		var ability_id := str(data.get("id", ""))
+		if ability_id.is_empty():
+			continue
+		if learned.size() < STARTING_ABILITY_COUNT:
+			learned.append(ability_id)
+			equipped.append(ability_id)
+		elif ability_unlocked_for_level(ability_id, int(stats.level), class_id):
+			learned.append(ability_id)
+	while equipped.size() < MAX_EQUIPPED_ABILITIES:
+		equipped.append("")
+	return {
+		"class_id": class_id,
+		"name": str(preset.get("name", "Fremder")),
+		"gender": str(preset.get("gender", "female")),
+		"appearance": str(preset.get("appearance", "priest")),
+		"stats": stats,
+		"learned_abilities": learned,
+		"equipped_abilities": equipped
+	}
+
+
+func _sync_companion_level() -> void:
+	if not has_companion():
+		return
+	var stats: Dictionary = companion.stats
+	stats.level = int(player_stats.get("level", 1))
+	stats.xp = int(player_stats.get("xp", 0))
+	stats.next_xp = int(player_stats.get("next_xp", 60))
+	var class_id := str(companion.get("class_id", ""))
+	var learned: Array[String] = companion_learned_abilities()
+	for data in class_abilities(class_id):
+		var ability_id := str(data.get("id", ""))
+		if ability_id.is_empty() or learned.has(ability_id):
+			continue
+		if ability_unlocked_for_level(ability_id, int(stats.level), class_id):
+			learned.append(ability_id)
+	companion.stats = stats
+	companion.learned_abilities = learned
 
 
 func max_resource(resource_name: String) -> float:
@@ -514,9 +919,19 @@ func ability_unlock_level(ability_id: String) -> int:
 	return 999
 
 
-func ability_unlocked_for_level(ability_id: String, level: int = -1) -> bool:
+func ability_unlocked_for_level(ability_id: String, level: int = -1, class_id: String = "") -> bool:
 	var resolved_level := level if level > 0 else int(player_stats.get("level", 1))
-	return resolved_level >= ability_unlock_level(ability_id)
+	var pool := class_abilities(class_id)
+	for index in range(pool.size()):
+		if str(pool[index].get("id", "")) != ability_id:
+			continue
+		if index < STARTING_ABILITY_COUNT:
+			return true
+		var unlock_index := index - STARTING_ABILITY_COUNT
+		if ABILITY_UNLOCK_LEVELS.is_empty():
+			return true
+		return resolved_level >= ABILITY_UNLOCK_LEVELS[mini(unlock_index, ABILITY_UNLOCK_LEVELS.size() - 1)]
+	return false
 
 
 func ability_slot_id(index: int) -> String:
@@ -552,7 +967,14 @@ func ability_action_points(ability_id: String) -> int:
 
 
 func ability_cooldown(ability_id: String) -> int:
-	var data := ability(ability_id)
+	return _ability_cooldown_for_data(ability(ability_id))
+
+
+func companion_ability_cooldown(ability_id: String) -> int:
+	return _ability_cooldown_for_data(companion_ability(ability_id))
+
+
+func _ability_cooldown_for_data(data: Dictionary) -> int:
 	if data.is_empty():
 		return 0
 	var effect := str(data.get("effect", "damage"))
@@ -723,8 +1145,8 @@ func _tick_effect_list(list: Array[Dictionary]) -> void:
 			list[index] = entry
 
 
-func ability_tooltip_text(ability_id: String) -> String:
-	var data := ability(ability_id)
+func ability_tooltip_text(ability_id: String, for_companion: bool = false) -> String:
+	var data := companion_ability(ability_id) if for_companion else ability(ability_id)
 	if data.is_empty():
 		return ""
 	var lines: Array[String] = [
@@ -744,7 +1166,8 @@ func ability_tooltip_text(ability_id: String) -> String:
 	if not stats.is_empty():
 		lines.append("Stats: %s" % ", ".join(stats))
 	var costs: Array[String] = []
-	costs.append("AP %d" % ability_action_points(ability_id))
+	var ap_cost := companion_ability_action_points(ability_id) if for_companion else ability_action_points(ability_id)
+	costs.append("AP %d" % ap_cost)
 	if float(data.get("stamina_cost", 0.0)) > 0.0:
 		costs.append("Ausdauer %.0f" % float(data.get("stamina_cost", 0.0)))
 	if float(data.get("energy_cost", 0.0)) > 0.0:
@@ -753,7 +1176,8 @@ func ability_tooltip_text(ability_id: String) -> String:
 	if not item_cost.is_empty():
 		costs.append(UiFactory.cost_text(item_cost))
 	lines.append("Kosten: %s" % (", ".join(costs) if not costs.is_empty() else "keine"))
-	lines.append("Abklingzeit: %d Runde(n)" % ability_cooldown(ability_id))
+	var cooldown := companion_ability_cooldown(ability_id) if for_companion else ability_cooldown(ability_id)
+	lines.append("Abklingzeit: %d Runde(n)" % cooldown)
 	return "\n".join(lines)
 
 
@@ -770,6 +1194,7 @@ func grant_xp(amount: int, reason: String = "") -> void:
 		player_stats.next_xp = maxi(60, roundi(float(player_stats.get("next_xp", 60)) * 1.35 + 20.0))
 		leveled = true
 	if leveled:
+		_sync_companion_level()
 		EventBus.post_message("Levelaufstieg! Oeffne mit K das Levelmenue: passive Punkte und neue Faehigkeiten warten.")
 	elif not reason.is_empty():
 		EventBus.post_message("+%d Erfahrung: %s" % [amount, reason])
@@ -804,6 +1229,30 @@ func spend_skill_point(stat_name: String) -> bool:
 	return true
 
 
+func resume_scene_after_load() -> String:
+	if pending_story != "":
+		return "res://scenes/cinematics/story_slide.tscn"
+	if return_scene.ends_with(".tscn") and ResourceLoader.exists(return_scene):
+		return return_scene
+	return _default_resume_scene()
+
+
+func _default_resume_scene() -> String:
+	if current_location == "base":
+		return "res://scenes/base/base_scene.tscn"
+	var location := DataCatalog.location(current_location)
+	if location.is_empty():
+		return "res://scenes/world_map/world_map.tscn"
+	var kind := str(location.get("type", "Zone"))
+	if kind == "Haendler":
+		return "res://scenes/ui/trader_screen.tscn"
+	if kind == "Taverne":
+		return "res://scenes/ui/tavern_screen.tscn"
+	if kind == "Event":
+		return "res://scenes/world_map/world_map.tscn"
+	return "res://scenes/exploration/exploration_scene.tscn"
+
+
 func serialize() -> Dictionary:
 	return {
 		"game_active": game_active,
@@ -812,6 +1261,7 @@ func serialize() -> Dictionary:
 		"player_class": player_class,
 		"player_appearance": player_appearance,
 		"player_stats": player_stats,
+		"companion": companion,
 		"elena": elena,
 		"base_state": base_state,
 		"survivors": survivors,
@@ -821,6 +1271,12 @@ func serialize() -> Dictionary:
 		"story_flags": story_flags,
 		"quest_flags": quest_flags,
 		"current_location": current_location,
+		"return_scene": return_scene,
+		"story_return_scene": story_return_scene,
+		"pending_story": pending_story,
+		"pending_map_event_id": pending_map_event_id,
+		"pending_map_travel_event": pending_map_travel_event,
+		"pending_map_event_data": pending_map_event_data,
 		"run_statistics": run_statistics,
 		"learned_abilities": learned_abilities,
 		"equipped_abilities": equipped_abilities,
@@ -834,10 +1290,19 @@ func restore(data: Dictionary) -> void:
 	player_gender = str(data.get("player_gender", "female"))
 	player_name = str(data.get("player_name", "Morgan"))
 	player_class = str(data.get("player_class", "scout"))
-	player_appearance = str(data.get("player_appearance", "wanderer"))
+	player_appearance = str(data.get("player_appearance", "priest"))
+	if player_appearance == "medic":
+		player_appearance = "mara_hollow"
+	if player_appearance == "wanderer":
+		player_appearance = "priest"
 	if not APPEARANCE_OPTIONS.has(player_appearance):
-		player_appearance = "wanderer"
+		player_appearance = "priest"
+	if not companion.is_empty() and str(companion.get("appearance", "")) == "medic":
+		companion["appearance"] = "mara_hollow"
+	if not companion.is_empty() and str(companion.get("appearance", "")) == "wanderer":
+		companion["appearance"] = "priest"
 	player_stats = RpgRules.normalize_stats(data.get("player_stats", player_stats).duplicate(true))
+	companion = data.get("companion", companion).duplicate(true)
 	elena = data.get("elena", elena).duplicate(true)
 	base_state = data.get("base_state", base_state).duplicate(true)
 	_normalize_base_state()
@@ -848,6 +1313,12 @@ func restore(data: Dictionary) -> void:
 	story_flags = data.get("story_flags", {}).duplicate(true)
 	quest_flags = data.get("quest_flags", {}).duplicate(true)
 	current_location = str(data.get("current_location", "base"))
+	return_scene = str(data.get("return_scene", return_scene))
+	story_return_scene = str(data.get("story_return_scene", story_return_scene))
+	pending_story = str(data.get("pending_story", ""))
+	pending_map_event_id = str(data.get("pending_map_event_id", ""))
+	pending_map_travel_event = bool(data.get("pending_map_travel_event", false))
+	pending_map_event_data = data.get("pending_map_event_data", {}).duplicate(true)
 	run_statistics = data.get("run_statistics", run_statistics).duplicate(true)
 	learned_abilities.assign(data.get("learned_abilities", []))
 	equipped_abilities.assign(data.get("equipped_abilities", []))
@@ -856,4 +1327,22 @@ func restore(data: Dictionary) -> void:
 		claimed_ability_levels.append(int(level))
 	pending_ability_picks = int(data.get("pending_ability_picks", 0))
 	_validate_ability_state()
+	_validate_companion_state()
 	EventBus.stats_changed.emit()
+
+
+func _validate_companion_state() -> void:
+	if companion.is_empty():
+		return
+	var class_id := str(companion.get("class_id", ""))
+	if class_id.is_empty() or class_id == player_class:
+		companion = {}
+		return
+	if not DataCatalog.player_config().get("classes", {}).has(class_id):
+		companion = {}
+		return
+	if not companion.has("stats"):
+		companion = _build_companion_state(class_id)
+		return
+	companion.stats = RpgRules.normalize_stats(companion.stats.duplicate(true))
+	_sync_companion_level()

@@ -55,7 +55,11 @@ var sell_cart: Dictionary = {}
 
 
 func _ready() -> void:
-	var root := setup_gameplay("ASCHEMARKT", "Kaufen, verkaufen, sparen. Ziehe Items in die Mitte oder klicke sie an.")
+	AudioManager.play_scene_music("trader")
+	var root := setup_gameplay(
+		"ASCHEMARKT",
+		"Links: 1 Stueck waehlen. Rechts/Shift: ganzer Stapel. Bestaetigen zum Abschluss."
+	)
 	var layout := HBoxContainer.new()
 	layout.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	layout.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -129,7 +133,7 @@ func _build_center(parent: HBoxContainer) -> void:
 	buy_zone.custom_minimum_size.y = 190
 	box.add_child(buy_zone)
 	sell_zone = TradeDropZoneScript.new()
-	sell_zone.configure("sell", ["player"], _handle_drop)
+	sell_zone.configure("sell", ["player", "backpack"], _handle_drop)
 	sell_zone.custom_minimum_size.y = 190
 	box.add_child(sell_zone)
 	trade_total_label = UiFactory.body_label("", 16, UiFactory.COLOR_GOLD)
@@ -140,7 +144,7 @@ func _build_center(parent: HBoxContainer) -> void:
 	actions.add_theme_constant_override("h_separation", 8)
 	actions.add_theme_constant_override("v_separation", 8)
 	box.add_child(actions)
-	var confirm := UiFactory.button("Handel bestaetigen", _confirm_trade, 184)
+	var confirm := UiFactory.button("Handel bestaetigen", _confirm_trade, 184, AudioManager.UiClickKind.CONFIRM)
 	confirm.custom_minimum_size = Vector2(184, 40)
 	actions.add_child(confirm)
 	var clear := UiFactory.button("Auswahl leeren", _clear_carts, 184)
@@ -195,10 +199,15 @@ func _refresh_player_side() -> void:
 	var start := player_page * ITEMS_PER_PAGE
 	for index in range(start, mini(start + ITEMS_PER_PAGE, ids.size())):
 		var item_id := str(ids[index])
-		var available := int(InventorySystem.items.get(item_id, 0)) - int(sell_cart.get(item_id, 0))
-		if available <= 0:
+		if int(InventorySystem.items.get(item_id, 0)) - int(sell_cart.get(item_id, 0)) <= 0:
 			continue
-		player_grid.add_child(_item_card(item_id, available, "player", DataCatalog.item_sell_price(item_id)))
+		player_grid.add_child(_item_card(
+			item_id,
+			int(InventorySystem.items.get(item_id, 0)),
+			"player",
+			DataCatalog.item_sell_price(item_id),
+			int(sell_cart.get(item_id, 0))
+		))
 	_fill_empty_slots(player_grid)
 
 
@@ -229,9 +238,23 @@ func _refresh_carts() -> void:
 	UiFactory.clear_container(buy_zone.grid)
 	UiFactory.clear_container(sell_zone.grid)
 	for item_id in _sorted_cart_ids(buy_cart):
-		buy_zone.grid.add_child(_item_card(item_id, int(buy_cart[item_id]), "buy", DataCatalog.item_buy_price(item_id)))
+		buy_zone.grid.add_child(_item_card(
+			item_id,
+			int(buy_cart[item_id]),
+			"buy",
+			DataCatalog.item_buy_price(item_id),
+			0,
+			Callable(self, "_handle_cart_drop").bind("buy")
+		))
 	for item_id in _sorted_cart_ids(sell_cart):
-		sell_zone.grid.add_child(_item_card(item_id, int(sell_cart[item_id]), "sell", DataCatalog.item_sell_price(item_id)))
+		sell_zone.grid.add_child(_item_card(
+			item_id,
+			int(sell_cart[item_id]),
+			"sell",
+			DataCatalog.item_sell_price(item_id),
+			0,
+			Callable(self, "_handle_cart_drop").bind("sell")
+		))
 	_fill_empty_slots(buy_zone.grid, 6)
 	_fill_empty_slots(sell_zone.grid, 6)
 
@@ -251,30 +274,58 @@ func _refresh_totals() -> void:
 		trade_total_label.text = "Kaufen: %d DC   Verkaufen: %d DC\nAusgeglichen   Inventar: %s" % [buy_total, sell_total, carry_text]
 
 
-func _item_card(item_id: String, amount: int, source: String, price: int) -> PanelContainer:
+func _item_card(
+	item_id: String,
+	amount: int,
+	source: String,
+	price: int,
+	cart_amount: int = 0,
+	drop_callback: Callable = Callable()
+) -> PanelContainer:
 	var card := TradeItemCardScript.new()
-	card.configure(item_id, amount, source, price, _card_clicked)
+	card.configure(item_id, amount, source, price, _card_clicked, cart_amount, drop_callback)
 	return card
 
 
-func _card_clicked(item_id: String, source: String) -> void:
+func _card_clicked(item_id: String, source: String, event: InputEventMouseButton) -> void:
+	var use_all := event.shift_pressed or event.button_index == MOUSE_BUTTON_RIGHT
 	match source:
 		"player":
-			_add_to_sell(item_id)
+			if use_all:
+				_add_all_to_sell(item_id)
+			else:
+				_add_to_sell(item_id)
 		"trader":
-			_add_to_buy(item_id)
+			if use_all:
+				_add_all_to_buy(item_id)
+			else:
+				_add_to_buy(item_id)
 		"buy":
-			_remove_from_cart(buy_cart, item_id)
+			if use_all:
+				_remove_all_from_cart(buy_cart, item_id)
+			else:
+				_remove_from_cart(buy_cart, item_id)
 		"sell":
-			_remove_from_cart(sell_cart, item_id)
+			if use_all:
+				_remove_all_from_cart(sell_cart, item_id)
+			else:
+				_remove_from_cart(sell_cart, item_id)
 	_refresh()
 
 
-func _handle_drop(zone: String, item_id: String, source: String) -> void:
+func _handle_cart_drop(zone: String, item_id: String, source: String) -> void:
 	if zone == "buy" and source == "trader":
 		_add_to_buy(item_id)
 	elif zone == "sell" and source == "player":
 		_add_to_sell(item_id)
+	_refresh()
+
+
+func _handle_drop(zone: String, item_id: String, source: String) -> void:
+	if zone == "sell" and source in ["backpack", "storage", "equipment", "quick", "combat_quick", "player"]:
+		_add_to_sell(item_id)
+	elif zone == "buy" and source == "trader":
+		_add_to_buy(item_id)
 	_refresh()
 
 
@@ -284,6 +335,7 @@ func _add_to_buy(item_id: String) -> void:
 		return
 	buy_cart[item_id] = int(buy_cart.get(item_id, 0)) + 1
 	feedback_label.text = "%s zum Einkauf gelegt." % DataCatalog.item(item_id).get("name", item_id)
+	AudioManager.play_trade_sfx("buy")
 
 
 func _add_to_sell(item_id: String) -> void:
@@ -292,6 +344,34 @@ func _add_to_sell(item_id: String) -> void:
 		return
 	sell_cart[item_id] = int(sell_cart.get(item_id, 0)) + 1
 	feedback_label.text = "%s zum Verkauf gelegt." % DataCatalog.item(item_id).get("name", item_id)
+	AudioManager.play_trade_sfx("sell")
+
+
+func _add_all_to_buy(item_id: String) -> void:
+	var available := int(trader_stock.get(item_id, 0)) - int(buy_cart.get(item_id, 0))
+	if available <= 0:
+		feedback_label.text = "Davon hat der Haendler nichts mehr."
+		return
+	buy_cart[item_id] = int(buy_cart.get(item_id, 0)) + available
+	feedback_label.text = "%d x %s zum Einkauf gelegt." % [int(buy_cart[item_id]), DataCatalog.item(item_id).get("name", item_id)]
+	AudioManager.play_trade_sfx("buy")
+
+
+func _add_all_to_sell(item_id: String) -> void:
+	var available := int(InventorySystem.items.get(item_id, 0)) - int(sell_cart.get(item_id, 0))
+	if available <= 0:
+		feedback_label.text = "Davon liegt nichts mehr im Rucksack."
+		return
+	sell_cart[item_id] = int(sell_cart.get(item_id, 0)) + available
+	feedback_label.text = "%d x %s zum Verkauf gelegt." % [int(sell_cart[item_id]), DataCatalog.item(item_id).get("name", item_id)]
+	AudioManager.play_trade_sfx("sell_big")
+
+
+func _remove_all_from_cart(cart: Dictionary, item_id: String) -> void:
+	if int(cart.get(item_id, 0)) <= 0:
+		return
+	cart.erase(item_id)
+	feedback_label.text = "%s komplett aus der Auswahl entfernt." % DataCatalog.item(item_id).get("name", item_id)
 
 
 func _remove_from_cart(cart: Dictionary, item_id: String) -> void:
@@ -330,6 +410,12 @@ func _confirm_trade() -> void:
 	sell_cart.clear()
 	TimeSystem.advance(1, "Handel am Aschemarkt.")
 	feedback_label.text = "Handel abgeschlossen."
+	if sell_total > 0:
+		AudioManager.play_trade_sfx("sell_big" if sell_total >= 20 else "sell")
+	if buy_total > 0 and sell_total > 0:
+		AudioManager.play_trade_sfx("confirm")
+	elif buy_total > 0:
+		AudioManager.play_trade_sfx("buy")
 	_refresh()
 
 
@@ -388,6 +474,7 @@ func _fill_empty_slots(grid: GridContainer, target_count: int = ITEMS_PER_PAGE) 
 		style.set_border_width_all(1)
 		style.set_corner_radius_all(5)
 		empty.add_theme_stylebox_override("panel", style)
+		empty.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		grid.add_child(empty)
 
 
@@ -407,4 +494,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_ESCAPE:
 			accept_event()
+			if close_active_popup():
+				return
 			_return()
+			return
+		super._unhandled_input(event)
